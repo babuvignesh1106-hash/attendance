@@ -17,4 +17,5 @@ export const ROUTES = {
   ADMINFORM: "/adminform",
   LOGIN: "/login",
   SIGNUP: "/signup",
+  CHECKOUT: "/checkout",
 };

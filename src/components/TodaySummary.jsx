@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAttendanceStore } from "../store/attendanceStore";
+import CheckOutDialog from "./CheckOutDialog"; // 👈 Import the animated dialog
 
 export default function TodaySummary() {
   const {
@@ -13,6 +14,7 @@ export default function TodaySummary() {
   } = useAttendanceStore();
 
   const [displayTime, setDisplayTime] = useState("00:00:00");
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -29,17 +31,7 @@ export default function TodaySummary() {
     return () => clearInterval(interval);
   }, [elapsedTime]);
 
-  const handleCheckOut = () => {
-    const data = {
-      startTime: startTime ? new Date(startTime).toLocaleTimeString() : "--:--",
-      endTime: new Date().toLocaleTimeString(),
-      elapsedTime: displayTime,
-      breakCount,
-    };
-    console.log("Local Attendance Record:", data);
-    checkOut();
-  };
-
+  // Format ms → HH:MM:SS
   function formatTime(ms) {
     const totalSec = Math.floor(ms / 1000);
     const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
@@ -52,6 +44,28 @@ export default function TodaySummary() {
   const fillPercent = Math.min((elapsedTime / eightHours) * 100, 100);
   const overtimeMs = elapsedTime > eightHours ? elapsedTime - eightHours : 0;
   const overtimeDisplay = formatTime(overtimeMs);
+
+  // 🟢 Check-In handler
+  const handleCheckIn = () => checkIn();
+
+  // 🔴 Open dialog on Check-Out click
+  const handleCheckOutClick = () => setShowDialog(true);
+
+  // ✅ Confirm Check-Out
+  const confirmCheckOut = () => {
+    const data = {
+      startTime: startTime ? new Date(startTime).toLocaleTimeString() : "--:--",
+      endTime: new Date().toLocaleTimeString(),
+      elapsedTime: displayTime,
+      breakCount,
+    };
+    console.log("Local Attendance Record:", data);
+    checkOut();
+    setShowDialog(false);
+  };
+
+  // ❌ Cancel dialog
+  const cancelCheckOut = () => setShowDialog(false);
 
   return (
     <div className="w-full rounded-xl p-4 sm:p-6 md:p-8 lg:p-10 bg-white flex flex-col gap-6">
@@ -85,7 +99,7 @@ export default function TodaySummary() {
           </div>
         </div>
 
-        {/* Check-in / Check-out Box */}
+        {/* Check-In / Check-Out Box */}
         <div className="bg-green-200 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col gap-4 sm:gap-6 shadow-md border border-green-300 w-full max-w-md mx-auto">
           <div className="text-center font-bold text-lg sm:text-xl md:text-2xl text-blue-600">
             {isCheckedIn ? "Checked In" : "Not Checked In"}
@@ -113,14 +127,14 @@ export default function TodaySummary() {
           <div className="flex justify-center mt-2">
             {!isCheckedIn ? (
               <button
-                onClick={checkIn}
+                onClick={handleCheckIn}
                 className="bg-green-500 hover:bg-green-600 text-white px-6 sm:px-8 py-2 sm:py-3 w-full rounded-lg font-bold text-lg transition hover:shadow-lg"
               >
                 Check-In
               </button>
             ) : (
               <button
-                onClick={handleCheckOut}
+                onClick={handleCheckOutClick}
                 className="bg-red-500 hover:bg-red-600 text-white px-6 sm:px-8 py-2 sm:py-3 w-full rounded-lg font-bold text-lg transition hover:shadow-lg"
               >
                 Check-Out
@@ -148,6 +162,15 @@ export default function TodaySummary() {
           </div>
         ))}
       </div>
+
+      {/* Animated Check-Out Dialog */}
+      {showDialog && (
+        <CheckOutDialog
+          workedTime={formatTime(elapsedTime)}
+          onConfirm={confirmCheckOut}
+          onCancel={cancelCheckOut}
+        />
+      )}
     </div>
   );
 }
