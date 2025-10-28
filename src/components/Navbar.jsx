@@ -3,9 +3,9 @@ import { useAttendanceStore } from "../store/attendanceStore";
 import Logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import CheckOutDialog from "./CheckOutDialog"; // 👈 Import dialog here
+import CheckOutDialog from "./CheckOutDialog";
+import LogoutDialog from "./LogoutDialog"; // 👈 Import the new component
 
-// Format milliseconds into HH:MM:SS
 function formatTime(ms) {
   const totalSec = Math.floor(ms / 1000);
   const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
@@ -17,32 +17,37 @@ function formatTime(ms) {
 export default function Navbar({ onToggleSidebar }) {
   const { isCheckedIn, checkIn, checkOut, elapsedTime, isOnBreak } =
     useAttendanceStore();
-  const [showDialog, setShowDialog] = useState(false);
+
+  const [showCheckOutDialog, setShowCheckOutDialog] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const navigate = useNavigate();
 
   const workedTimeFormatted = formatTime(elapsedTime);
 
-  const handleLogout = () => {
+  // ✅ Logout logic
+  const handleLogoutClick = () => setShowLogoutDialog(true);
+  const confirmLogout = () => {
     if (isCheckedIn) checkOut();
     localStorage.clear();
     navigate("/");
+    setShowLogoutDialog(false);
   };
+  const cancelLogout = () => setShowLogoutDialog(false);
 
-  const handleCheckOutClick = () => setShowDialog(true);
-
+  // ✅ Check-Out logic
+  const handleCheckOutClick = () => setShowCheckOutDialog(true);
   const confirmCheckOut = () => {
     checkOut();
-    setShowDialog(false);
+    setShowCheckOutDialog(false);
   };
-
-  const cancelCheckOut = () => setShowDialog(false);
+  const cancelCheckOut = () => setShowCheckOutDialog(false);
 
   return (
     <>
       {/* Navbar */}
       <nav className="bg-[#0b2c5d] shadow-md fixed w-full top-0 z-50">
         <div className="flex items-center justify-between px-4 py-3">
-          {/* Left: Hamburger + Logo + Title */}
+          {/* Left Section */}
           <div className="flex items-center gap-3">
             <button
               onClick={onToggleSidebar}
@@ -57,7 +62,7 @@ export default function Navbar({ onToggleSidebar }) {
             </span>
           </div>
 
-          {/* Right: Timer + Buttons */}
+          {/* Right Section */}
           <div className="flex items-center gap-3">
             <div className="bg-white text-black font-mono px-3 py-1 rounded-md shadow-md min-w-[120px] text-center">
               {formatTime(elapsedTime)} {isOnBreak && "(On Break)"}
@@ -80,7 +85,7 @@ export default function Navbar({ onToggleSidebar }) {
             )}
 
             <button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               className="bg-gray-500 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded-md shadow-md transition-all"
             >
               Logout
@@ -89,13 +94,17 @@ export default function Navbar({ onToggleSidebar }) {
         </div>
       </nav>
 
-      {/* Check-Out Dialog */}
-      {showDialog && (
+      {/* Dialogs */}
+      {showCheckOutDialog && (
         <CheckOutDialog
           workedTime={workedTimeFormatted}
           onConfirm={confirmCheckOut}
           onCancel={cancelCheckOut}
         />
+      )}
+
+      {showLogoutDialog && (
+        <LogoutDialog onConfirm={confirmLogout} onCancel={cancelLogout} />
       )}
     </>
   );
