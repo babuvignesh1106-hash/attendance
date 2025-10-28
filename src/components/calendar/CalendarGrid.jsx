@@ -28,7 +28,7 @@ export default function CalendarGrid() {
 
   const username = localStorage.getItem("name") || "";
 
-  // Fetch attendance data from backend
+  // ✅ Fetch & aggregate data per date
   const fetchAttendance = () => {
     setLoading(true);
     setError(null);
@@ -36,14 +36,41 @@ export default function CalendarGrid() {
     axios
       .get("http://localhost:8000/attendance")
       .then((res) => {
-        if (Array.isArray(res.data)) {
-          const filtered = res.data.filter(
-            (item) => item.username === username
-          );
-          setAttendanceData(filtered);
-        } else {
+        if (!Array.isArray(res.data)) {
           setAttendanceData([]);
+          return;
         }
+
+        // Filter user-specific records
+        const userRecords = res.data.filter((r) => r.username === username);
+
+        // ✅ Group by date (same day = aggregate)
+        const grouped = {};
+        userRecords.forEach((rec) => {
+          if (!rec.startTime) return;
+          const d = new Date(rec.startTime);
+          const dateKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+          if (!grouped[dateKey]) {
+            grouped[dateKey] = {
+              date: d,
+              username: rec.username,
+              workedDuration: 0,
+              totalBreakDuration: 0,
+              breakCount: 0,
+              sessions: [],
+            };
+          }
+
+          grouped[dateKey].workedDuration += rec.workedDuration || 0;
+          grouped[dateKey].totalBreakDuration += rec.totalBreakDuration || 0;
+          grouped[dateKey].breakCount += rec.breakCount || 0;
+          grouped[dateKey].sessions.push(rec);
+        });
+
+        // Convert to array
+        const aggregated = Object.values(grouped);
+        setAttendanceData(aggregated);
       })
       .catch((err) => {
         console.error("Failed to fetch attendance:", err);
@@ -52,22 +79,21 @@ export default function CalendarGrid() {
       .finally(() => setLoading(false));
   };
 
-  // Auto refresh every 10 seconds
+  // Auto refresh every 10s
   useEffect(() => {
     fetchAttendance();
     const interval = setInterval(fetchAttendance, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  // Calendar logic
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 0=Sun
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
   const today = new Date();
 
+  // ✅ Find aggregated record for the date
   const findRecordForDay = (day) => {
     return attendanceData.find((item) => {
-      if (!item.startTime) return false;
-      const d = new Date(item.startTime);
+      const d = item.date;
       return (
         d.getDate() === day &&
         d.getMonth() === currentMonth &&
@@ -80,16 +106,14 @@ export default function CalendarGrid() {
     working: "bg-green-400 text-green-800 border-green-500",
     absent: "bg-red-200 text-red-800 border-red-400",
     holiday: "bg-yellow-200 text-yellow-800 border-yellow-400",
-    halfday: "bg-blue-200 text-blue-800 border-blue-400",
     future: "bg-gray-200 text-gray-500 border-gray-300",
   };
 
-  // Full grid: include blanks before first day
   const totalCells = firstDayOfMonth + daysInMonth;
   const exampleDates = Array.from({ length: totalCells }, (_, i) => {
     const dayNum = i - firstDayOfMonth + 1;
 
-    if (i < firstDayOfMonth) return { blank: true }; // empty space
+    if (i < firstDayOfMonth) return { blank: true };
 
     const record = findRecordForDay(dayNum);
     const tempDate = new Date(currentYear, currentMonth, dayNum);
@@ -97,9 +121,7 @@ export default function CalendarGrid() {
 
     let status = "future";
     if (record) status = "working";
-    if (weekday === 0 || weekday === 6) {
-      status = record ? "working" : "holiday";
-    }
+    if (weekday === 0 || weekday === 6) status = record ? "working" : "holiday";
 
     return { day: dayNum, status, record };
   });
@@ -123,16 +145,16 @@ export default function CalendarGrid() {
   };
 
   return (
-    <div className="w-full rounded-xl p-4 font-sans bg-white ">
+    <div className="w-full rounded-xl p-4 font-sans bg-white">
       {/* Header */}
       <div className="flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-indigo-100 mb-4">
-        <h3 className="text-2xl font-bold text-indigo-600 tracking-wide m-0">
+        <h3 className="text-2xl font-bold text-indigo-600">
           Attendance Calendar
         </h3>
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevMonth}
-            className="bg-blue-800 text-white px-3 py-1 rounded-md font-bold text-sm hover:bg-blue-900 transition"
+            className="bg-blue-800 text-white px-3 py-1 rounded-md font-bold text-sm hover:bg-blue-900"
           >
             &lt;
           </button>
@@ -141,14 +163,14 @@ export default function CalendarGrid() {
           </span>
           <button
             onClick={handleNextMonth}
-            className="bg-blue-800 text-white px-3 py-1 rounded-md font-bold text-sm hover:bg-blue-900 transition"
+            className="bg-blue-800 text-white px-3 py-1 rounded-md font-bold text-sm hover:bg-blue-900"
           >
             &gt;
           </button>
         </div>
       </div>
 
-      {/* Days of week */}
+      {/* Weekdays */}
       <div className="grid grid-cols-7 gap-6 mb-2">
         {daysOfWeek.map((d) => (
           <div
@@ -160,15 +182,13 @@ export default function CalendarGrid() {
         ))}
       </div>
 
-      {/* Loading / Error */}
       {loading && <div className="text-center py-4">Loading attendance...</div>}
       {error && <div className="text-center py-2 text-red-600">{error}</div>}
 
-      {/* Dates grid */}
+      {/* Calendar */}
       <div className="grid grid-cols-7 gap-6">
         {exampleDates.map((d, i) => {
           if (d.blank) return <div key={`blank-${i}`} className="h-10"></div>;
-
           const isToday =
             d.day === today.getDate() &&
             currentMonth === today.getMonth() &&
@@ -197,7 +217,6 @@ export default function CalendarGrid() {
         })}
       </div>
 
-      {/* Popup */}
       {selectedRecord && (
         <EmployeePopup
           record={selectedRecord}

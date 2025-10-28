@@ -15,7 +15,6 @@ import {
 // 🎨 Color codes
 const WEEKDAY_BLUE = "#7dd3fc";
 const WEEKEND_YELLOW = "#fffa93";
-const NOT_CHECKED_RED = "#f87171";
 const INACTIVE_GRAY = "#d1d5db";
 const GRID_COLOR = "#e5e7eb";
 
@@ -55,7 +54,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 const getStartOfWeek = (date) => {
   const d = new Date(date);
   const day = d.getDay(); // 0–6 (Sun–Sat)
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when Sunday
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust for Sunday
   return new Date(d.setDate(diff));
 };
 
@@ -110,7 +109,7 @@ export default function WeeklyStatusChart() {
           Sun: { workedDuration: 0, breakCount: 0 },
         };
 
-        // Group entries by date
+        // ✅ Group entries by date
         const groupedByDate = {};
         userData.forEach((entry) => {
           const dateKey = new Date(entry.startTime).toDateString();
@@ -118,35 +117,35 @@ export default function WeeklyStatusChart() {
           groupedByDate[dateKey].push(entry);
         });
 
-        // For each day, use first check-in and last check-out
+        // ✅ Sum all worked durations and break counts for each date
         Object.keys(groupedByDate).forEach((dateKey) => {
-          const entries = groupedByDate[dateKey].sort(
-            (a, b) => new Date(a.startTime) - new Date(b.startTime)
+          const entries = groupedByDate[dateKey];
+
+          // Sum total workedDuration (in seconds) and breakCount
+          const totalWorkedSeconds = entries.reduce(
+            (sum, e) => sum + (e.workedDuration || 0),
+            0
+          );
+          const totalBreakCount = entries.reduce(
+            (sum, e) => sum + (e.breakCount || 0),
+            0
           );
 
-          const firstCheckIn = entries[0];
-          const lastCheckOut = entries
-            .filter((e) => e.endTime)
-            .sort((a, b) => new Date(b.endTime) - new Date(a.endTime))[0];
+          const weekday = new Date(entries[0].startTime).toLocaleDateString(
+            "en-US",
+            { weekday: "short" }
+          );
 
-          if (firstCheckIn && lastCheckOut) {
-            const weekday = new Date(firstCheckIn.startTime).toLocaleDateString(
-              "en-US",
-              { weekday: "short" }
-            );
+          // Convert seconds to hours
+          const workedHours = totalWorkedSeconds / 3600;
 
-            // ✅ Take workedDuration (in seconds) from lastCheckOut only
-            const workedHours = (lastCheckOut.workedDuration || 0) / 3600;
-
-            weekData[weekday].workedDuration = workedHours;
-            weekData[weekday].breakCount = entries.reduce(
-              (sum, e) => sum + (e.breakCount || 0),
-              0
-            );
+          if (weekData[weekday]) {
+            weekData[weekday].workedDuration += workedHours;
+            weekData[weekday].breakCount += totalBreakCount;
           }
         });
 
-        // Convert to chart-friendly array
+        // ✅ Convert to chart-friendly array
         const chartData = Object.keys(weekData).map((day) => ({
           day,
           ...weekData[day],
@@ -195,15 +194,14 @@ export default function WeeklyStatusChart() {
             <Bar dataKey="workedDuration" radius={[6, 6, 0, 0]}>
               {data.map((entry, index) => {
                 const isWeekend = entry.day === "Sat" || entry.day === "Sun";
-
                 let fillColor;
 
                 if (isWeekend) {
-                  fillColor = WEEKEND_YELLOW; // always yellow for Sat & Sun
+                  fillColor = WEEKEND_YELLOW;
                 } else if (entry.workedDuration === 0) {
-                  fillColor = INACTIVE_GRAY; // no work done
+                  fillColor = INACTIVE_GRAY;
                 } else {
-                  fillColor = WEEKDAY_BLUE; // worked hours
+                  fillColor = WEEKDAY_BLUE;
                 }
 
                 return <Cell key={`bar-${index}`} fill={fillColor} />;
