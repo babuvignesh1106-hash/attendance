@@ -10,7 +10,9 @@ import {
   ResponsiveContainer,
   CartesianGrid,
   Cell,
+  Label,
 } from "recharts";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 // 🎨 Color codes
 const WEEKDAY_BLUE = "#7dd3fc";
@@ -50,36 +52,38 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-// ✅ Helper to get Monday of current week
+// ✅ Helper to get Monday of a given week
 const getStartOfWeek = (date) => {
   const d = new Date(date);
   const day = d.getDay(); // 0–6 (Sun–Sat)
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust for Sunday
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   return new Date(d.setDate(diff));
 };
 
-// ✅ Helper to check if a date is in current week
-const isDateInCurrentWeek = (date) => {
-  const today = new Date();
-  const startOfWeek = getStartOfWeek(today);
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(endOfWeek.getDate() + 6);
-
+// ✅ Check if a date is in a specific week
+const isDateInWeek = (date, weekStart) => {
+  const start = new Date(weekStart);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
   const d = new Date(date);
-  return d >= startOfWeek && d <= endOfWeek;
+  return d >= start && d <= end;
+};
+
+// ✅ Format week range (e.g. "Oct 21 – Oct 27, 2025")
+const formatWeekRange = (startDate) => {
+  const end = new Date(startDate);
+  end.setDate(startDate.getDate() + 6);
+  const options = { month: "short", day: "numeric" };
+  return `${startDate.toLocaleDateString(
+    "en-US",
+    options
+  )} – ${end.toLocaleDateString("en-US", options)}`;
 };
 
 export default function WeeklyStatusChart() {
-  const [data, setData] = useState([
-    { day: "Mon", workedDuration: 0, breakCount: 0 },
-    { day: "Tue", workedDuration: 0, breakCount: 0 },
-    { day: "Wed", workedDuration: 0, breakCount: 0 },
-    { day: "Thu", workedDuration: 0, breakCount: 0 },
-    { day: "Fri", workedDuration: 0, breakCount: 0 },
-    { day: "Sat", workedDuration: 0, breakCount: 0 },
-    { day: "Sun", workedDuration: 0, breakCount: 0 },
-  ]);
-
+  const [data, setData] = useState([]);
+  const [weekStart, setWeekStart] = useState(getStartOfWeek(new Date()));
+  const [weekLabel, setWeekLabel] = useState("");
   const storedUsername = localStorage.getItem("name");
 
   useEffect(() => {
@@ -90,15 +94,13 @@ export default function WeeklyStatusChart() {
 
         if (!storedUsername) return;
 
-        // Filter by username and current week
         const userData = attendanceData.filter(
           (entry) =>
             entry.username === storedUsername &&
             entry.startTime &&
-            isDateInCurrentWeek(entry.startTime)
+            isDateInWeek(entry.startTime, weekStart)
         );
 
-        // Initialize week data
         const weekData = {
           Mon: { workedDuration: 0, breakCount: 0 },
           Tue: { workedDuration: 0, breakCount: 0 },
@@ -109,7 +111,6 @@ export default function WeeklyStatusChart() {
           Sun: { workedDuration: 0, breakCount: 0 },
         };
 
-        // ✅ Group entries by date
         const groupedByDate = {};
         userData.forEach((entry) => {
           const dateKey = new Date(entry.startTime).toDateString();
@@ -117,11 +118,8 @@ export default function WeeklyStatusChart() {
           groupedByDate[dateKey].push(entry);
         });
 
-        // ✅ Sum all worked durations and break counts for each date
         Object.keys(groupedByDate).forEach((dateKey) => {
           const entries = groupedByDate[dateKey];
-
-          // Sum total workedDuration (in seconds) and breakCount
           const totalWorkedSeconds = entries.reduce(
             (sum, e) => sum + (e.workedDuration || 0),
             0
@@ -136,38 +134,51 @@ export default function WeeklyStatusChart() {
             { weekday: "short" }
           );
 
-          // Convert seconds to hours
           const workedHours = totalWorkedSeconds / 3600;
-
           if (weekData[weekday]) {
             weekData[weekday].workedDuration += workedHours;
             weekData[weekday].breakCount += totalBreakCount;
           }
         });
 
-        // ✅ Convert to chart-friendly array
         const chartData = Object.keys(weekData).map((day) => ({
           day,
           ...weekData[day],
         }));
 
         setData(chartData);
+        setWeekLabel(formatWeekRange(weekStart));
       } catch (error) {
         console.error("Error fetching attendance:", error);
       }
     };
 
     fetchAttendance();
-  }, [storedUsername]);
+  }, [weekStart, storedUsername]);
+
+  const handlePrevWeek = () => {
+    const newStart = new Date(weekStart);
+    newStart.setDate(weekStart.getDate() - 7);
+    setWeekStart(newStart);
+  };
+
+  const handleNextWeek = () => {
+    const newStart = new Date(weekStart);
+    newStart.setDate(weekStart.getDate() + 7);
+    setWeekStart(newStart);
+  };
+
+  const today = new Date();
 
   return (
     <div className="flex flex-col items-center justify-start h-full w-full py-8">
-      <div className="text-center flex flex-col items-center justify-start font-sans text-sm w-full space-y-4">
-        <h2 className="text-2xl font-bold text-blue-600 tracking-wide">
+      <div className="w-full max-w-3xl flex flex-col items-center font-sans">
+        <h2 className="text-2xl font-bold text-blue-600 mb-2">
           Weekly Status Chart
         </h2>
+
         {storedUsername && (
-          <p className="text-gray-500 mb-2">
+          <p className="text-gray-500 mb-4">
             Showing data for{" "}
             <span className="font-semibold text-gray-700">
               {storedUsername}
@@ -175,6 +186,26 @@ export default function WeeklyStatusChart() {
           </p>
         )}
 
+        {/* Week Navigation */}
+        <div className="flex items-center space-x-4 mb-4">
+          <button
+            onClick={handlePrevWeek}
+            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full shadow"
+          >
+            <IoChevronBack className="text-xl text-gray-700" />
+          </button>
+          <span className="text-lg font-semibold text-gray-700">
+            {weekLabel}
+          </span>
+          <button
+            onClick={handleNextWeek}
+            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full shadow"
+          >
+            <IoChevronForward className="text-xl text-gray-700" />
+          </button>
+        </div>
+
+        {/* Chart */}
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={data} barGap={4}>
             <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} />
@@ -183,32 +214,69 @@ export default function WeeklyStatusChart() {
               type="number"
               domain={[0, 14]}
               ticks={[0, 2, 4, 6, 8, 10, 12, 14]}
-              interval={0}
-              allowDataOverflow
-              allowDecimals={true}
               tick={{ fill: "#374151", fontSize: 14, fontWeight: "bold" }}
-            />
+            >
+              <Label
+                value="Hours"
+                angle={-90}
+                position="insideLeft"
+                style={{ textAnchor: "middle", fill: "#6b7280", fontSize: 14 }}
+              />
+            </YAxis>
+
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: "14px" }} />
 
-            <Bar dataKey="workedDuration" radius={[6, 6, 0, 0]}>
+            <Bar
+              dataKey="workedDuration"
+              radius={[6, 6, 0, 0]}
+              minPointSize={20}
+            >
               {data.map((entry, index) => {
                 const isWeekend = entry.day === "Sat" || entry.day === "Sun";
-                let fillColor;
+                const isNonWorking = entry.workedDuration === 0;
 
-                if (isWeekend) {
-                  fillColor = WEEKEND_YELLOW;
-                } else if (entry.workedDuration === 0) {
-                  fillColor = INACTIVE_GRAY;
-                } else {
-                  fillColor = WEEKDAY_BLUE;
-                }
+                // Determine date of this weekday in current week
+                const dayIndex = [
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                  "Sun",
+                ].indexOf(entry.day);
+                const entryDate = new Date(weekStart);
+                entryDate.setDate(weekStart.getDate() + dayIndex);
+
+                const isFuture = entryDate > today;
+
+                let fillColor;
+                if (isFuture) fillColor = INACTIVE_GRAY;
+                else if (isWeekend || isNonWorking) fillColor = WEEKEND_YELLOW;
+                else fillColor = WEEKDAY_BLUE;
 
                 return <Cell key={`bar-${index}`} fill={fillColor} />;
               })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+
+        {/* 🎨 Color Legend */}
+        <div className="flex justify-center items-center gap-6 mt-6 text-sm font-medium text-gray-700">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-[#7dd3fc] border" />
+            <span>Worked Days</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-[#fffa93] border" />
+            <span>Non-working / Weekend</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded bg-[#d1d5db] border" />
+            <span>Future Days</span>
+          </div>
+        </div>
       </div>
     </div>
   );

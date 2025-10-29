@@ -11,6 +11,9 @@ export default function Signup() {
     Name: "",
     Email: "",
     Password: "",
+    EmployeeId: "",
+    Designation: "",
+    Role: "",
   });
   const [dialog, setDialog] = useState({ isOpen: false, message: "" });
 
@@ -26,6 +29,9 @@ export default function Signup() {
         name: data.Name,
         email: data.Email,
         password: data.Password,
+        employeeId: data.EmployeeId,
+        designation: data.Designation,
+        role: data.Role,
       });
       return res.data;
     },

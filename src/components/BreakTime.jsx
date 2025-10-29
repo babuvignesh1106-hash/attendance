@@ -5,20 +5,69 @@ import BreakApp from "../pages/BreakApp";
 export default function BreakTime() {
   const { isCheckedIn, isOnBreak, toggleBreak, elapsedTime, breakCount } =
     useAttendanceStore();
-  const [breakTime, setBreakTime] = useState(0);
+  const [breakTime, setBreakTime] = useState(() =>
+    parseInt(localStorage.getItem("breakTime") || "0")
+  );
+  const [breakStartTime, setBreakStartTime] = useState(() =>
+    parseInt(localStorage.getItem("breakStartTime") || "0")
+  );
   const [showBreakApp, setShowBreakApp] = useState(false);
 
+  const MAX_BREAK_TIME = 60 * 60 * 1000; // 1 hour in ms
+
+  // 🕐 Load state on mount
+  useEffect(() => {
+    const savedBreakTime = parseInt(localStorage.getItem("breakTime") || "0");
+    const savedBreakStart = parseInt(
+      localStorage.getItem("breakStartTime") || "0"
+    );
+
+    setBreakTime(savedBreakTime);
+    setBreakStartTime(savedBreakStart);
+  }, []);
+
+  // 🕒 Track break timer
   useEffect(() => {
     let interval = null;
+
     if (isOnBreak) {
+      if (!breakStartTime) {
+        const start = Date.now();
+        setBreakStartTime(start);
+        localStorage.setItem("breakStartTime", start.toString());
+      }
+
       interval = setInterval(() => {
-        setBreakTime((prev) => prev + 1000);
+        const currentTime = Date.now();
+        const duration = currentTime - breakStartTime;
+        const newTime = Math.min(duration, MAX_BREAK_TIME);
+
+        setBreakTime(newTime);
+        localStorage.setItem("breakTime", newTime.toString());
+
+        // ⏰ Auto end break after 1 hour
+        if (newTime >= MAX_BREAK_TIME) {
+          clearInterval(interval);
+          alert("⚠️ Break limit reached (1 hour). Auto-resuming work.");
+          handleResumeWork();
+        }
       }, 1000);
     } else {
       clearInterval(interval);
+      localStorage.removeItem("breakStartTime");
     }
+
     return () => clearInterval(interval);
-  }, [isOnBreak]);
+  }, [isOnBreak, breakStartTime]);
+
+  // 🟢 Handle resume work
+  const handleResumeWork = () => {
+    toggleBreak();
+    setBreakTime(0);
+    setBreakStartTime(0);
+    localStorage.removeItem("breakTime");
+    localStorage.removeItem("breakStartTime");
+  };
 
   const formatTime = (ms) => {
     const totalSec = Math.floor(ms / 1000);
@@ -31,7 +80,7 @@ export default function BreakTime() {
   return (
     <div className="w-full max-w-md mx-auto p-6">
       {/* Outer Container */}
-      <div className=" rounded-2xl p-2 flex flex-col gap-6">
+      <div className="rounded-2xl p-2 flex flex-col gap-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-blue-600">
@@ -90,7 +139,16 @@ export default function BreakTime() {
 
         {/* Action Button */}
         <button
-          onClick={toggleBreak}
+          onClick={() => {
+            if (isOnBreak) {
+              handleResumeWork();
+            } else {
+              toggleBreak();
+              const start = Date.now();
+              setBreakStartTime(start);
+              localStorage.setItem("breakStartTime", start.toString());
+            }
+          }}
           disabled={!isCheckedIn}
           className={`w-full py-3 rounded-xl font-bold text-lg text-white transition ${
             isOnBreak

@@ -104,11 +104,11 @@ export default function CalendarGrid() {
 
   const statusClasses = {
     working: "bg-green-400 text-green-800 border-green-500",
-    absent: "bg-red-200 text-red-800 border-red-400",
     holiday: "bg-yellow-200 text-yellow-800 border-yellow-400",
     future: "bg-gray-200 text-gray-500 border-gray-300",
   };
 
+  // ✅ Mark working, no-data, weekend, or future
   const totalCells = firstDayOfMonth + daysInMonth;
   const exampleDates = Array.from({ length: totalCells }, (_, i) => {
     const dayNum = i - firstDayOfMonth + 1;
@@ -120,8 +120,18 @@ export default function CalendarGrid() {
     const weekday = tempDate.getDay();
 
     let status = "future";
-    if (record) status = "working";
-    if (weekday === 0 || weekday === 6) status = record ? "working" : "holiday";
+
+    if (record) {
+      status = "working"; // ✅ Worked
+    } else {
+      const isWeekend = weekday === 0 || weekday === 6;
+      const isPastOrToday = tempDate <= today;
+      if (isWeekend || isPastOrToday) {
+        status = "holiday"; // 💛 Weekend or No Data
+      } else {
+        status = "future"; // ⚪ Future days
+      }
+    }
 
     return { day: dayNum, status, record };
   });
@@ -145,7 +155,7 @@ export default function CalendarGrid() {
   };
 
   return (
-    <div className="w-full rounded-xl p-4 font-sans bg-white">
+    <div className="w-full rounded-xl p-12 font-sans bg-white">
       {/* Header */}
       <div className="flex justify-between items-center bg-gray-100 p-3 rounded-lg border border-indigo-100 mb-4">
         <h3 className="text-2xl font-bold text-indigo-600">
@@ -217,6 +227,23 @@ export default function CalendarGrid() {
         })}
       </div>
 
+      {/* ✅ Legend Section */}
+      <div className="flex justify-center gap-4 mt-5 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-sm bg-green-400 border border-green-500"></div>
+          Worked Day
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-sm bg-yellow-200 border border-yellow-400"></div>
+          Weekend / No Data
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="w-3 h-3 rounded-sm bg-gray-200 border border-gray-300"></div>
+          Future Date
+        </div>
+      </div>
+
+      {/* Employee Popup */}
       {selectedRecord && (
         <EmployeePopup
           record={selectedRecord}
