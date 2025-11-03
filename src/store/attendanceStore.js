@@ -71,7 +71,10 @@ export const useAttendanceStore = create(
             username,
           };
 
-          await axios.post("http://localhost:8000/attendance", data);
+          await axios.post(
+            "https://attendance-backend-bqhw.vercel.app/attendance",
+            data
+          );
         } catch (error) {
           console.error("Attendance check-out failed:", error);
         }

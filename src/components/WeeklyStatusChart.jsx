@@ -89,7 +89,9 @@ export default function WeeklyStatusChart() {
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/attendance");
+        const res = await axios.get(
+          "https://attendance-backend-bqhw.vercel.app/attendance"
+        );
         const attendanceData = res.data || [];
 
         if (!storedUsername) return;

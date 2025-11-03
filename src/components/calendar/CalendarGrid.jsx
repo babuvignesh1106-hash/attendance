@@ -34,7 +34,7 @@ export default function CalendarGrid() {
     setError(null);
 
     axios
-      .get("http://localhost:8000/attendance")
+      .get("https://attendance-backend-bqhw.vercel.app/attendance")
       .then((res) => {
         if (!Array.isArray(res.data)) {
           setAttendanceData([]);

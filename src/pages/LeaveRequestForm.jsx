@@ -51,7 +51,10 @@ export default function LeaveRequestForm() {
     }
 
     try {
-      await axios.post("http://localhost:8000/leaves", formData);
+      await axios.post(
+        "https://attendance-backend-bqhw.vercel.app/leaves",
+        formData
+      );
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 4000);
 
