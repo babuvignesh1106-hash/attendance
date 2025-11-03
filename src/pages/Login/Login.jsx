@@ -19,10 +19,13 @@ export default function Login() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (data) => {
-      const res = await axios.post("http://localhost:8000/auth/login", {
-        email: data.Email,
-        password: data.Password,
-      });
+      const res = await axios.post(
+        "https://attendance-backend-bqhw.vercel.app/auth/login",
+        {
+          email: data.Email,
+          password: data.Password,
+        }
+      );
       return res.data; // { access_token, user: { id, email, name, password } }
     },
     onSuccess: (data) => {

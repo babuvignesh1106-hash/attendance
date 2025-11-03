@@ -11,6 +11,7 @@ import { ROUTES } from "../constants/routes";
 import CalendarGrid from "../components/calendar/CalendarGrid";
 import Admin from "../components/admin/Admin";
 import LeaveRequestForm from "./LeaveRequestForm";
+import AdminForm from "../components/admin/AdminForm";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // sidebar initially closed
@@ -48,8 +49,8 @@ export default function Dashboard() {
             isSidebarOpen ? "ml-64" : "ml-0"
           }`}
         >
-          <main className="min-h-[calc(100vh-70px)] p-6 sm:p-8 overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-6 ">
+          <main className=" p-4 sm:p-8 overflow-y-auto lg:scale-[0.9] xl:scale-[0.9] origin-top">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-6  ">
               {activePage === ROUTES.DASHBOARD && (
                 <>
                   <div className="col-span-2 bg-white p-4 rounded-xl shadow-md h-full flex flex-col">
@@ -77,12 +78,12 @@ export default function Dashboard() {
               )}
 
               {activePage === ROUTES.ADMIN && (
-                <div className="col-span-8 bg-white p-6 rounded-xl shadow-md h-full">
+                <div className="col-span-8 p-6 rounded-xl  h-full">
                   <Admin />
                 </div>
               )}
               {activePage === ROUTES.LeaveRequestForm && (
-                <div className="col-span-8 bg-white p-6 rounded-xl shadow-md h-full">
+                <div className="col-span-8 p-6 rounded-xl  h-full">
                   <LeaveRequestForm />
                 </div>
               )}

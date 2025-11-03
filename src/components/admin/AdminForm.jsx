@@ -22,7 +22,7 @@ export default function AdminForm({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r rounded-2xl from-blue-100 to-blue-300 px-4">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8"

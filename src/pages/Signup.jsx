@@ -22,11 +22,14 @@ export default function Signup() {
 
   const signupMutation = useMutation({
     mutationFn: async (data) => {
-      const res = await axios.post("http://localhost:8000/auth/signup", {
-        name: data.Name,
-        email: data.Email,
-        password: data.Password,
-      });
+      const res = await axios.post(
+        "https://attendance-backend-bqhw.vercel.app/auth/signup",
+        {
+          name: data.Name,
+          email: data.Email,
+          password: data.Password,
+        }
+      );
       return res.data;
     },
     onSuccess: () => {
