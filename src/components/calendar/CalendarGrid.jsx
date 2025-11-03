@@ -228,7 +228,7 @@ export default function CalendarGrid() {
       </div>
 
       {/* ✅ Legend Section */}
-      <div className="flex justify-center gap-4 mt-5 text-sm text-gray-600">
+      <div className="flex justify-center gap-4 mt-18 text-lg text-gray-600">
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-sm bg-green-400 border border-green-500"></div>
           Worked Day

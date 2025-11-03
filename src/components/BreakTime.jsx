@@ -95,40 +95,41 @@ export default function BreakTime() {
         </div>
 
         {/* Stats */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 w-full">
           {/* Break Info Card */}
-          <div className="p-6 rounded-xl bg-green-300 shadow flex flex-col gap-3">
-            <div className="flex justify-between">
-              <span className="text-gray-700 text-xl font-bold">
+          <div className="p-4 sm:p-6 rounded-xl bg-green-300 shadow flex flex-col gap-3 w-full max-w-full">
+            <div className="flex flex-col items-center text-center w-full">
+              <span className="text-gray-700 text-lg sm:text-xl font-bold">
                 Break Count
               </span>
-              <span className="text-blue-600 text-2xl font-bold">
+              <span className="text-blue-600 text-2xl sm:text-3xl font-extrabold mt-1">
                 {breakCount}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-700 text-xl font-bold">
+
+            <div className="flex flex-col items-center text-center w-full">
+              <span className="text-gray-700 text-lg sm:text-xl font-bold">
                 Current Break
               </span>
-              <span className="text-blue-600 text-2xl font-bold">
+              <span className="text-blue-600 text-2xl sm:text-3xl font-extrabold mt-1">
                 {formatTime(breakTime)}
               </span>
             </div>
           </div>
 
           {/* Work Info Card */}
-          <div className="p-6 rounded-xl bg-green-300 shadow flex flex-col gap-3">
-            <div className="flex justify-between">
-              <span className="text-gray-700 text-xl font-bold">
-                Total
-                <br /> Work Time
+          <div className="p-4 sm:p-6 rounded-xl bg-green-300 shadow flex flex-col gap-3 w-full max-w-full">
+            <div className="flex flex-col items-center text-center w-full">
+              <span className="text-gray-700 text-lg sm:text-xl font-bold leading-tight">
+                Total Work Time
               </span>
-              <span className="text-blue-600 text-2xl font-bold">
+              <span className="text-blue-600 text-2xl sm:text-3xl font-extrabold mt-1">
                 {formatTime(elapsedTime)}
               </span>
             </div>
+
             <p
-              className={`text-center text-xl font-bold mt-2 ${
+              className={`text-center text-lg sm:text-xl font-bold mt-2 ${
                 isOnBreak ? "text-red-500" : "text-green-600"
               }`}
             >

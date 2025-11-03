@@ -9,6 +9,8 @@ import EmpSidebar from "../components/sidebar/EmpSidebar";
 import WeeklyStatusChart from "../components/WeeklyStatusChart";
 import { ROUTES } from "../constants/routes";
 import CalendarGrid from "../components/calendar/CalendarGrid";
+import Admin from "../components/admin/Admin";
+import LeaveRequestForm from "./LeaveRequestForm";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // sidebar initially closed
@@ -71,6 +73,17 @@ export default function Dashboard() {
               {activePage === ROUTES.CALENDARGRID && (
                 <div className="col-span-8 bg-white p-6 rounded-xl shadow-md h-full">
                   <CalendarGrid />
+                </div>
+              )}
+
+              {activePage === ROUTES.ADMIN && (
+                <div className="col-span-8 bg-white p-6 rounded-xl shadow-md h-full">
+                  <Admin />
+                </div>
+              )}
+              {activePage === ROUTES.LeaveRequestForm && (
+                <div className="col-span-8 bg-white p-6 rounded-xl shadow-md h-full">
+                  <LeaveRequestForm />
                 </div>
               )}
             </div>

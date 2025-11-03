@@ -1,3 +1,5 @@
+import LeaveRequestForm from "../pages/LeaveRequestForm";
+
 //basic example
 export const ROUTES = {
   DASHBOARD: "/dashboard",
@@ -18,4 +20,5 @@ export const ROUTES = {
   LOGIN: "/login",
   SIGNUP: "/signup",
   CHECKOUT: "/checkout",
+  LeaveRequestForm: "/leaverequestform",
 };

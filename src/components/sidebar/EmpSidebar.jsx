@@ -13,7 +13,7 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
   const [openPermission, setOpenPermission] = useState(false);
 
   const permissionItems = [
-    { label: "Leave Request", route: ROUTES.LEAVE },
+    { label: "Leave Request", route: ROUTES.LeaveRequestForm },
     { label: "Corrections Request", route: ROUTES.CORRECTION },
     { label: "Permission Request", route: ROUTES.PERMISSION },
     { label: "Check-in Reset Request", route: ROUTES.RESET },
@@ -25,13 +25,15 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
         isOpen ? "translate-x-0" : "-translate-x-60"
       }`}
     >
-      {/* Calendar */}
+      {/* Dashboard */}
       <EmpSidebarItem
         icon={<FaTachometerAlt />}
-        label="dashboard"
+        label="Dashboard"
         onClick={() => onNavigate(ROUTES.DASHBOARD)}
         active={activePage === ROUTES.DASHBOARD}
       />
+
+      {/* Calendar */}
       <EmpSidebarItem
         icon={<FaTachometerAlt />}
         label="Calendar"
@@ -43,18 +45,23 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
       <EmpSidebarItem
         icon={<FaTable />}
         label="Admin"
+        onClick={() => onNavigate(ROUTES.ADMIN)}
         active={activePage === ROUTES.ADMIN}
       />
 
       {/* Permission Dropdown */}
       <div className="mx-2 mt-3">
-        <button className="w-full flex items-center justify-between bg-[#023e8a] px-4 py-3 rounded-lg text-lg font-semibold hover:bg-[#0353a4] transition">
+        <button
+          className="w-full flex items-center justify-between bg-[#023e8a] px-4 py-3 rounded-lg text-lg font-semibold hover:bg-[#0353a4] transition"
+          onClick={() => setOpenPermission((prev) => !prev)}
+        >
           <span className="flex items-center gap-2">
             <FaUserShield /> Permission
           </span>
           {openPermission ? <FaChevronUp /> : <FaChevronDown />}
         </button>
 
+        {/* Dropdown Items */}
         <div
           className={`bg-gray-100 rounded-lg shadow-md mt-2 overflow-hidden transition-all duration-300 ${
             openPermission ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
