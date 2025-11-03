@@ -49,7 +49,7 @@ export default function Dashboard() {
             isSidebarOpen ? "ml-64" : "ml-0"
           }`}
         >
-          <main className=" p-4 sm:p-8 overflow-y-auto lg:scale-[0.9] xl:scale-[0.9] origin-top">
+          <main className="relative p-4 sm:p-8 overflow-y-auto origin-top lg:scale-[0.9] xl:scale-[0.9]">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-6  ">
               {activePage === ROUTES.DASHBOARD && (
                 <>

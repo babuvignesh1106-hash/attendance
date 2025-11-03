@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useAttendanceStore } from "../store/attendanceStore";
-import CheckOutDialog from "./CheckOutDialog"; // 👈 Import the animated dialog
 
 export default function TodaySummary() {
   const {
@@ -14,7 +13,6 @@ export default function TodaySummary() {
   } = useAttendanceStore();
 
   const [displayTime, setDisplayTime] = useState("00:00:00");
-  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -48,11 +46,8 @@ export default function TodaySummary() {
   // 🟢 Check-In handler
   const handleCheckIn = () => checkIn();
 
-  // 🔴 Open dialog on Check-Out click
-  const handleCheckOutClick = () => setShowDialog(true);
-
-  // ✅ Confirm Check-Out
-  const confirmCheckOut = () => {
+  // 🔴 Direct Check-Out handler (no dialog)
+  const handleCheckOut = () => {
     const data = {
       startTime: startTime ? new Date(startTime).toLocaleTimeString() : "--:--",
       endTime: new Date().toLocaleTimeString(),
@@ -61,11 +56,7 @@ export default function TodaySummary() {
     };
     console.log("Local Attendance Record:", data);
     checkOut();
-    setShowDialog(false);
   };
-
-  // ❌ Cancel dialog
-  const cancelCheckOut = () => setShowDialog(false);
 
   return (
     <div className="w-full rounded-xl p-4 sm:p-6 md:p-8 lg:p-10 bg-white flex flex-col gap-6">
@@ -134,7 +125,7 @@ export default function TodaySummary() {
               </button>
             ) : (
               <button
-                onClick={handleCheckOutClick}
+                onClick={handleCheckOut}
                 className="bg-red-500 hover:bg-red-600 text-white px-6 sm:px-8 py-2 sm:py-3 w-full rounded-lg font-bold text-lg transition hover:shadow-lg"
               >
                 Check-Out
@@ -162,15 +153,6 @@ export default function TodaySummary() {
           </div>
         ))}
       </div>
-
-      {/* Animated Check-Out Dialog */}
-      {showDialog && (
-        <CheckOutDialog
-          workedTime={formatTime(elapsedTime)}
-          onConfirm={confirmCheckOut}
-          onCancel={cancelCheckOut}
-        />
-      )}
     </div>
   );
 }
