@@ -52,15 +52,17 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-// ✅ Helper to get Monday of a given week
+// ✅ Get start of week (Monday)
 const getStartOfWeek = (date) => {
   const d = new Date(date);
-  const day = d.getDay(); // 0–6 (Sun–Sat)
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.setDate(diff));
+  const day = d.getDay();
+  const diff = (day + 6) % 7;
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
 };
 
-// ✅ Check if a date is in a specific week
+// ✅ Check if a date is in the same week
 const isDateInWeek = (date, weekStart) => {
   const start = new Date(weekStart);
   const end = new Date(start);
@@ -69,7 +71,7 @@ const isDateInWeek = (date, weekStart) => {
   return d >= start && d <= end;
 };
 
-// ✅ Format week range (e.g. "Oct 21 – Oct 27, 2025")
+// ✅ Format week range
 const formatWeekRange = (startDate) => {
   const end = new Date(startDate);
   end.setDate(startDate.getDate() + 6);
@@ -84,21 +86,28 @@ export default function WeeklyStatusChart() {
   const [data, setData] = useState([]);
   const [weekStart, setWeekStart] = useState(getStartOfWeek(new Date()));
   const [weekLabel, setWeekLabel] = useState("");
+  const [loading, setLoading] = useState(false);
   const storedUsername = localStorage.getItem("name");
 
   useEffect(() => {
     const fetchAttendance = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(
           "https://attendance-backend-bqhw.vercel.app/attendance"
         );
         const attendanceData = res.data || [];
 
-        if (!storedUsername) return;
+        if (!storedUsername) {
+          console.warn("⚠️ No stored username found in localStorage");
+          setData([]);
+          setLoading(false);
+          return;
+        }
 
         const userData = attendanceData.filter(
           (entry) =>
-            entry.username === storedUsername &&
+            entry.username?.toLowerCase() === storedUsername?.toLowerCase() &&
             entry.startTime &&
             isDateInWeek(entry.startTime, weekStart)
         );
@@ -113,6 +122,7 @@ export default function WeeklyStatusChart() {
           Sun: { workedDuration: 0, breakCount: 0 },
         };
 
+        // Group by date
         const groupedByDate = {};
         userData.forEach((entry) => {
           const dateKey = new Date(entry.startTime).toDateString();
@@ -151,7 +161,10 @@ export default function WeeklyStatusChart() {
         setData(chartData);
         setWeekLabel(formatWeekRange(weekStart));
       } catch (error) {
-        console.error("Error fetching attendance:", error);
+        console.error("❌ Error fetching attendance:", error);
+        setData([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -207,7 +220,6 @@ export default function WeeklyStatusChart() {
           </button>
         </div>
 
-        {/* Chart */}
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={data} barGap={4}>
             <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} />
@@ -222,7 +234,11 @@ export default function WeeklyStatusChart() {
                 value="Hours"
                 angle={-90}
                 position="insideLeft"
-                style={{ textAnchor: "middle", fill: "#6b7280", fontSize: 14 }}
+                style={{
+                  textAnchor: "middle",
+                  fill: "#6b7280",
+                  fontSize: 14,
+                }}
               />
             </YAxis>
 
@@ -237,8 +253,6 @@ export default function WeeklyStatusChart() {
               {data.map((entry, index) => {
                 const isWeekend = entry.day === "Sat" || entry.day === "Sun";
                 const isNonWorking = entry.workedDuration === 0;
-
-                // Determine date of this weekday in current week
                 const dayIndex = [
                   "Mon",
                   "Tue",
@@ -250,7 +264,6 @@ export default function WeeklyStatusChart() {
                 ].indexOf(entry.day);
                 const entryDate = new Date(weekStart);
                 entryDate.setDate(weekStart.getDate() + dayIndex);
-
                 const isFuture = entryDate > today;
 
                 let fillColor;
