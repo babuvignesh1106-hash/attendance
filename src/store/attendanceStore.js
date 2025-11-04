@@ -14,6 +14,7 @@ export const useAttendanceStore = create(
       breakCount: 0,
       breakStart: null,
       breakElapsed: 0,
+      date: new Date().toDateString(), // 🔹 Store the current date
 
       // ✅ CHECK-IN
       checkIn: () => {
@@ -30,6 +31,12 @@ export const useAttendanceStore = create(
           }
 
           set({ elapsedTime: workedTime });
+
+          // 🔹 Check if date changed (crossed midnight)
+          const currentDate = new Date().toDateString();
+          if (get().date !== currentDate) {
+            get().autoCheckOutOnDateChange();
+          }
         }, 1000);
 
         set({
@@ -41,6 +48,7 @@ export const useAttendanceStore = create(
           isOnBreak: false,
           breakStart: null,
           elapsedTime: 0,
+          date: new Date().toDateString(),
         });
       },
 
@@ -88,7 +96,14 @@ export const useAttendanceStore = create(
           breakElapsed: 0,
           elapsedTime: 0,
           breakCount: 0,
+          date: new Date().toDateString(),
         });
+      },
+
+      // ✅ AUTO CHECKOUT when date changes
+      autoCheckOutOnDateChange: async () => {
+        console.log("🕛 Auto checkout triggered at midnight!");
+        await get().checkOut();
       },
 
       // ✅ TOGGLE BREAK
@@ -124,6 +139,7 @@ export const useAttendanceStore = create(
           breakCount: 0,
           breakStart: null,
           breakElapsed: 0,
+          date: new Date().toDateString(),
         });
       },
 
@@ -131,7 +147,6 @@ export const useAttendanceStore = create(
       resumeTimer: () => {
         if (!get().isCheckedIn) return;
 
-        // Clear any existing interval
         if (get().timerInterval) clearInterval(get().timerInterval);
 
         const interval = setInterval(() => {
@@ -144,6 +159,12 @@ export const useAttendanceStore = create(
           }
 
           set({ elapsedTime: workedTime });
+
+          // 🔹 Check if date changed
+          const currentDate = new Date().toDateString();
+          if (get().date !== currentDate) {
+            get().autoCheckOutOnDateChange();
+          }
         }, 1000);
 
         set({ timerInterval: interval });
@@ -159,6 +180,7 @@ export const useAttendanceStore = create(
         breakCount: state.breakCount,
         breakElapsed: state.breakElapsed,
         breakStart: state.breakStart,
+        date: state.date,
       }),
     }
   )
