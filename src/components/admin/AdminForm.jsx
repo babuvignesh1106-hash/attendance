@@ -5,13 +5,11 @@ export default function AdminForm({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  // ✅ Stored securely: hashed password (of "admin123")
   const ADMIN_USERNAME = "admin";
   const ADMIN_HASHED_PASSWORD = "0192023a7bbd73250516f069df18b500"; // md5("admin123")
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const inputHash = CryptoJS.MD5(password).toString();
 
     if (username === ADMIN_USERNAME && inputHash === ADMIN_HASHED_PASSWORD) {
@@ -22,7 +20,7 @@ export default function AdminForm({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r rounded-2xl from-blue-100 to-blue-300 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8"

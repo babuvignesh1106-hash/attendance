@@ -14,9 +14,6 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
 
   const permissionItems = [
     { label: "Leave Request", route: ROUTES.LeaveRequestForm },
-    { label: "Corrections Request", route: ROUTES.CORRECTION },
-    { label: "Permission Request", route: ROUTES.PERMISSION },
-    { label: "Check-in Reset Request", route: ROUTES.RESET },
   ];
 
   return (
