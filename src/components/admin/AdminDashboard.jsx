@@ -3,16 +3,19 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import AttendanceTable from "./AttendanceTable";
 import LeaveTable from "./LeaveTable";
+import PermissionTable from "./PermissionTable"; // ✅ new import
 
 export default function AdminDashboard({ onLogout }) {
-  const [activeTab, setActiveTab] = useState(""); // "", "attendance", "leaves"
+  const [activeTab, setActiveTab] = useState(""); // "", "attendance", "leaves", "permission"
   const [attendanceData, setAttendanceData] = useState([]);
   const [leaveData, setLeaveData] = useState([]);
+  const [permissionData, setPermissionData] = useState([]); // ✅ new
   const [selectedUser, setSelectedUser] = useState("All");
 
   useEffect(() => {
     if (activeTab === "attendance") fetchAttendance();
     if (activeTab === "leaves") fetchLeaves();
+    if (activeTab === "permission") fetchPermissions();
   }, [activeTab]);
 
   const fetchAttendance = async () => {
@@ -34,6 +37,17 @@ export default function AdminDashboard({ onLogout }) {
       setLeaveData(res.data);
     } catch (err) {
       console.error("Error fetching leaves", err);
+    }
+  };
+
+  const fetchPermissions = async () => {
+    try {
+      const res = await axios.get(
+        "https://attendance-backend-bqhw.vercel.app/permission"
+      );
+      setPermissionData(res.data);
+    } catch (err) {
+      console.error("Error fetching permissions", err);
     }
   };
 
@@ -68,7 +82,8 @@ export default function AdminDashboard({ onLogout }) {
           Admin Dashboard
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-3xl">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 w-full max-w-4xl">
+          {/* Attendance Box */}
           <div
             onClick={() => setActiveTab("attendance")}
             className="bg-white rounded-2xl shadow-lg p-8 text-center cursor-pointer hover:shadow-2xl transition"
@@ -81,6 +96,7 @@ export default function AdminDashboard({ onLogout }) {
             </p>
           </div>
 
+          {/* Leave Box */}
           <div
             onClick={() => setActiveTab("leaves")}
             className="bg-white rounded-2xl shadow-lg p-8 text-center cursor-pointer hover:shadow-2xl transition"
@@ -89,6 +105,19 @@ export default function AdminDashboard({ onLogout }) {
               Leave Requests
             </h3>
             <p className="text-gray-600">Review all employee leave requests.</p>
+          </div>
+
+          {/* ✅ Permission Box */}
+          <div
+            onClick={() => setActiveTab("permission")}
+            className="bg-white rounded-2xl shadow-lg p-8 text-center cursor-pointer hover:shadow-2xl transition"
+          >
+            <h3 className="text-2xl font-semibold text-blue-700 mb-4">
+              Permission Requests
+            </h3>
+            <p className="text-gray-600">
+              View all employee short-duration permissions.
+            </p>
           </div>
         </div>
 
@@ -115,4 +144,9 @@ export default function AdminDashboard({ onLogout }) {
 
   if (activeTab === "leaves")
     return <LeaveTable data={leaveData} onBack={() => setActiveTab("")} />;
+
+  if (activeTab === "permission")
+    return (
+      <PermissionTable data={permissionData} onBack={() => setActiveTab("")} />
+    );
 }

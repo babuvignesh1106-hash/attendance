@@ -12,6 +12,7 @@ import CalendarGrid from "../components/calendar/CalendarGrid";
 import Admin from "../components/admin/Admin";
 import LeaveRequestForm from "./LeaveRequestForm";
 import AdminForm from "../components/admin/AdminForm";
+import PermissionRequestForm from "../components/PermissionRequestForm";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // sidebar initially closed
@@ -85,6 +86,11 @@ export default function Dashboard() {
               {activePage === ROUTES.LeaveRequestForm && (
                 <div className="col-span-8 p-6 rounded-xl  h-full">
                   <LeaveRequestForm />
+                </div>
+              )}
+              {activePage === ROUTES.PERMISSIONREQUESTFORM && (
+                <div className="col-span-8 p-6 rounded-xl  h-full">
+                  <PermissionRequestForm />
                 </div>
               )}
             </div>

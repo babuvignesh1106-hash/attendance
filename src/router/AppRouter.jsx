@@ -15,6 +15,7 @@ import Signup from "../pages/Signup";
 import ProtectedRoute from "../router/ProtectedRoute"; // ✅ Add this for route protection
 import CheckOutDialog from "../components/CheckOutDialog";
 import LeaveRequestForm from "../pages/LeaveRequestForm";
+import PermissionRequestForm from "../components/PermissionRequestForm";
 
 export default function AppRouter() {
   return (
@@ -43,6 +44,10 @@ export default function AppRouter() {
           <Route
             path={ROUTES.LeaveRequestForm}
             element={<LeaveRequestForm />}
+          />
+          <Route
+            path={ROUTES.PERMISSIONREQUESTFORM}
+            element={<PermissionRequestForm />}
           />
         </Route>
       </Routes>

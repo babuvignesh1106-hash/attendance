@@ -1,17 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import * as XLSX from "xlsx";
 
 export default function LeaveTable({ data, onBack }) {
-  // 🔹 Function to export leave data to Excel
+  const [selectedUser, setSelectedUser] = useState("All");
+
+  // 🔹 Get unique user names for dropdown
+  const uniqueUsers = ["All", ...new Set(data.map((leave) => leave.name))];
+
+  // 🔹 Filter leaves based on selected user
+  const filteredData =
+    selectedUser === "All"
+      ? data
+      : data.filter((leave) => leave.name === selectedUser);
+
+  // 🔹 Export data to Excel (filtered by user)
   const exportToExcel = () => {
-    if (!data || data.length === 0) {
+    if (!filteredData || filteredData.length === 0) {
       alert("No data available to export!");
       return;
     }
 
-    // Create a new workbook and worksheet
     const worksheet = XLSX.utils.json_to_sheet(
-      data.map((leave) => ({
+      filteredData.map((leave) => ({
         ID: leave.id,
         Name: leave.name,
         "Leave Type": leave.leaveType,
@@ -26,19 +36,24 @@ export default function LeaveTable({ data, onBack }) {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Leave Requests");
 
-    // Generate and download Excel file
-    XLSX.writeFile(workbook, "LeaveRequests.xlsx");
+    // File name based on selected user
+    const fileName =
+      selectedUser === "All"
+        ? "All_LeaveRequests.xlsx"
+        : `${selectedUser}_LeaveRequests.xlsx`;
+
+    XLSX.writeFile(workbook, fileName);
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      {/* 🔹 Header */}
+      {/* 🔹 Page Title */}
       <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">
         Leave Requests
       </h2>
 
-      {/* 🔹 Actions (Back + Export Buttons) */}
-      <div className="flex justify-center gap-4 mb-6">
+      {/* 🔹 Controls */}
+      <div className="flex flex-wrap justify-center gap-4 mb-6">
         <button
           onClick={onBack}
           className="bg-gray-600 text-white py-2 px-6 rounded-lg hover:bg-gray-700 transition-all"
@@ -46,15 +61,29 @@ export default function LeaveTable({ data, onBack }) {
           Back
         </button>
 
+        {/* 🔹 User Filter Dropdown */}
+        <select
+          value={selectedUser}
+          onChange={(e) => setSelectedUser(e.target.value)}
+          className="border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-blue-500"
+        >
+          {uniqueUsers.map((user, index) => (
+            <option key={index} value={user}>
+              {user}
+            </option>
+          ))}
+        </select>
+
+        {/* 🔹 Export Button */}
         <button
           onClick={exportToExcel}
           className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-all"
         >
-          Export to Excel
+          Export {selectedUser === "All" ? "All" : selectedUser} Data
         </button>
       </div>
 
-      {/* 🔹 Table */}
+      {/* 🔹 Leave Table */}
       <div className="overflow-x-auto bg-white rounded-2xl shadow-lg p-6">
         <table className="w-full border border-gray-200">
           <thead>
@@ -70,8 +99,8 @@ export default function LeaveTable({ data, onBack }) {
             </tr>
           </thead>
           <tbody>
-            {data.length > 0 ? (
-              data.map((leave) => (
+            {filteredData.length > 0 ? (
+              filteredData.map((leave) => (
                 <tr key={leave.id} className="hover:bg-blue-50">
                   <td className="p-3 border border-gray-200">{leave.id}</td>
                   <td className="p-3 border border-gray-200">{leave.name}</td>
@@ -107,7 +136,7 @@ export default function LeaveTable({ data, onBack }) {
                   colSpan="8"
                   className="text-center p-4 text-gray-500 italic"
                 >
-                  No leave requests found.
+                  No leave records found for {selectedUser}.
                 </td>
               </tr>
             )}

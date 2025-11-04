@@ -21,4 +21,5 @@ export const ROUTES = {
   SIGNUP: "/signup",
   CHECKOUT: "/checkout",
   LeaveRequestForm: "/leaverequestform",
+  PERMISSIONREQUESTFORM: "/permissionrequestform",
 };
