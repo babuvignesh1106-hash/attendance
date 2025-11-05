@@ -96,7 +96,7 @@ export default function LeaveRequestForm() {
       if (!name) throw new Error("User name not found in localStorage");
 
       const response = await axios.get(
-        `http://localhost:8000/leaves/balance/${name}`
+        `https://attendance-backend-bqhw.vercel.app/leaves/balance/${name}`
       );
       setBalanceData(response.data);
     } catch (error) {

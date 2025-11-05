@@ -9,7 +9,9 @@ export default function Approved() {
   useEffect(() => {
     const fetchLeaves = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/leaves");
+        const res = await axios.get(
+          "https://attendance-backend-bqhw.vercel.app/leaves"
+        );
         const userLeaves = res.data.filter((leave) => leave.name === username);
         setLeaves(userLeaves);
       } catch (err) {
@@ -23,9 +25,12 @@ export default function Approved() {
   const handleStatusChange = async (index, newStatus) => {
     const leave = leaves[index];
     try {
-      await axios.put(`http://localhost:8000/leaves/${leave.id}`, {
-        status: newStatus,
-      });
+      await axios.put(
+        `https://attendance-backend-bqhw.vercel.app/leaves/${leave.id}`,
+        {
+          status: newStatus,
+        }
+      );
       const updatedLeaves = [...leaves];
       updatedLeaves[index].status = newStatus;
       setLeaves(updatedLeaves);

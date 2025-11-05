@@ -9,7 +9,7 @@ export default function BalanceCheck() {
     const fetchBalance = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8000/leaves/balance/${username}`
+          `https://attendance-backend-bqhw.vercel.app/leaves/balance/${username}`
         );
         setBalanceData(res.data);
       } catch (err) {

@@ -13,7 +13,9 @@ export default function LeaveTable({ onBack }) {
   useEffect(() => {
     const fetchLeaves = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/leaves");
+        const response = await axios.get(
+          "https://attendance-backend-bqhw.vercel.app/leaves"
+        );
         setLeaveData(response.data);
       } catch (error) {
         console.error("Error fetching leaves:", error);
@@ -75,9 +77,12 @@ export default function LeaveTable({ onBack }) {
 
   const handleSave = async () => {
     try {
-      await axios.put(`http://localhost:8000/leaves/${editingLeave.id}`, {
-        status: editingLeave.status,
-      });
+      await axios.put(
+        `https://attendance-backend-bqhw.vercel.app/leaves/${editingLeave.id}`,
+        {
+          status: editingLeave.status,
+        }
+      );
       setLeaveData((prev) =>
         prev.map((leave) =>
           leave.id === editingLeave.id
