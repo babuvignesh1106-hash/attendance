@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Approved() {
-  const username = localStorage.getItem("name"); // get logged-in user
+  const username = localStorage.getItem("name");
   const [leaves, setLeaves] = useState([]);
-  const [error, setError] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All"); // filter by status
+  const [statusFilter, setStatusFilter] = useState("All");
 
   useEffect(() => {
     const fetchLeaves = async () => {
@@ -14,13 +13,11 @@ export default function Approved() {
         const userLeaves = res.data.filter((leave) => leave.name === username);
         setLeaves(userLeaves);
       } catch (err) {
-        console.error(err);
-        setError("Failed to fetch leaves");
+        console.error("Failed to fetch leaves", err);
       }
     };
 
     if (username) fetchLeaves();
-    else setError("No username found in localStorage");
   }, [username]);
 
   const handleStatusChange = async (index, newStatus) => {
@@ -42,13 +39,6 @@ export default function Approved() {
     statusFilter === "All"
       ? leaves
       : leaves.filter((leave) => leave.status === statusFilter);
-
-  if (error)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">
-        {error}
-      </div>
-    );
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
