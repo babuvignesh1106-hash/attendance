@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useAttendanceStore } from "../store/attendanceStore";
-
 import EmployeeDetails from "../components/EmployeeDetails";
 import TodaySummary from "../components/TodaySummary";
 import BreakTime from "../components/BreakTime";
@@ -11,8 +10,10 @@ import { ROUTES } from "../constants/routes";
 import CalendarGrid from "../components/calendar/CalendarGrid";
 import Admin from "../components/admin/Admin";
 import LeaveRequestForm from "./LeaveRequestForm";
-import AdminForm from "../components/admin/AdminForm";
 import PermissionRequestForm from "../components/PermissionRequestForm";
+import BalanceCheck from "../components/BalanceCheck";
+import LeaveDashboard from "../components/leave/LeaveDashboard";
+import ApprovedLeaves from "../components/leave/ApprovedLeaves.JSX";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // sidebar initially closed
@@ -83,14 +84,29 @@ export default function Dashboard() {
                   <Admin />
                 </div>
               )}
-              {activePage === ROUTES.LeaveRequestForm && (
-                <div className="col-span-8 p-6 rounded-xl  h-full">
-                  <LeaveRequestForm />
+              {activePage === ROUTES.LEAVEDASHBOARD && (
+                <div className="col-span-8 p-6 rounded-xl h-full">
+                  <LeaveDashboard setActivePage={setActivePage} />
                 </div>
               )}
               {activePage === ROUTES.PERMISSIONREQUESTFORM && (
                 <div className="col-span-8 p-6 rounded-xl  h-full">
                   <PermissionRequestForm />
+                </div>
+              )}
+              {activePage === ROUTES.BALANCECHECK && (
+                <div className="col-span-8 p-6 rounded-xl  h-full">
+                  <BalanceCheck />
+                </div>
+              )}
+              {activePage === ROUTES.LEAVEREQUESTFORM && (
+                <div className="col-span-8 p-6 rounded-xl  h-full">
+                  <LeaveRequestForm />
+                </div>
+              )}
+              {activePage === ROUTES.APPROVEDLEAVES && (
+                <div className="col-span-8 p-6 rounded-xl  h-full">
+                  <ApprovedLeaves />
                 </div>
               )}
             </div>

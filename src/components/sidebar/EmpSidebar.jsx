@@ -13,7 +13,7 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
   const [openPermission, setOpenPermission] = useState(false);
 
   const permissionItems = [
-    { label: "Leave Request", route: ROUTES.LeaveRequestForm },
+    { label: "Leave Request", route: ROUTES.LEAVEDASHBOARD },
     { label: "Permission Request", route: ROUTES.PERMISSIONREQUESTFORM },
   ];
 

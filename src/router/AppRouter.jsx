@@ -16,6 +16,9 @@ import ProtectedRoute from "../router/ProtectedRoute"; // ✅ Add this for route
 import CheckOutDialog from "../components/CheckOutDialog";
 import LeaveRequestForm from "../pages/LeaveRequestForm";
 import PermissionRequestForm from "../components/PermissionRequestForm";
+import BalanceCheck from "../components/BalanceCheck";
+import LeaveDashboard from "../components/leave/LeaveDashboard";
+import ApprovedLeaves from "../components/leave/ApprovedLeaves.JSX";
 
 export default function AppRouter() {
   return (
@@ -49,6 +52,9 @@ export default function AppRouter() {
             path={ROUTES.PERMISSIONREQUESTFORM}
             element={<PermissionRequestForm />}
           />
+          <Route path={ROUTES.BALANCECHECK} element={<BalanceCheck />} />
+          <Route path={ROUTES.LEAVEDASHBOARD} element={<LeaveDashboard />} />
+          <Route path={ROUTES.APPROVEDLEAVES} element={<ApprovedLeaves />} />
         </Route>
       </Routes>
     </BrowserRouter>
