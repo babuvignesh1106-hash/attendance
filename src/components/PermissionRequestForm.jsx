@@ -44,7 +44,10 @@ export default function PermissionRequestForm() {
     }
 
     try {
-      await axios.post("http://localhost:8000/permission", formData);
+      await axios.post(
+        "https://attendance-backend-bqhw.vercel.app/permission",
+        formData
+      );
       setShowSuccess(true);
 
       setTimeout(() => {
