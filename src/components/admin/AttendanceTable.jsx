@@ -8,6 +8,13 @@ export default function AttendanceTable({
   onExport,
   onBack,
 }) {
+  // ✅ Convert seconds to decimal hours (e.g., 3.75 hrs)
+  const formatToHours = (seconds) => {
+    if (!seconds || isNaN(seconds)) return "0 hrs";
+    const hours = seconds / 3600;
+    return `${hours.toFixed(2)} hrs`;
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">
@@ -66,11 +73,13 @@ export default function AttendanceTable({
                   {new Date(r.endTime).toLocaleString()}
                 </td>
                 <td className="p-3 border border-gray-200">
-                  {r.workedDuration} mins
+                  {formatToHours(r.workedDuration)}
                 </td>
                 <td className="p-3 border border-gray-200">{r.breakCount}</td>
                 <td className="p-3 border border-gray-200">
-                  {r.totalBreakDuration}
+                  {r.totalBreakDuration
+                    ? formatToHours(r.totalBreakDuration)
+                    : "0 hrs"}
                 </td>
                 <td className="p-3 border border-gray-200">{r.username}</td>
               </tr>
