@@ -13,7 +13,7 @@ import LeaveRequestForm from "./LeaveRequestForm";
 import PermissionRequestForm from "../components/PermissionRequestForm";
 import BalanceCheck from "../components/BalanceCheck";
 import LeaveDashboard from "../components/leave/LeaveDashboard";
-import ApprovedLeaves from "../components/leave/ApprovedLeaves.JSX";
+import Approved from "../components/leave/Approved";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // sidebar initially closed
@@ -104,9 +104,9 @@ export default function Dashboard() {
                   <LeaveRequestForm />
                 </div>
               )}
-              {activePage === ROUTES.APPROVEDLEAVES && (
+              {activePage === ROUTES.APPROVED && (
                 <div className="col-span-8 p-6 rounded-xl  h-full">
-                  <ApprovedLeaves />
+                  <Approved />
                 </div>
               )}
             </div>

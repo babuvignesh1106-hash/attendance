@@ -22,5 +22,5 @@ export const ROUTES = {
   PERMISSIONREQUESTFORM: "/permissionrequestform",
   BALANCECHECK: "/leaves/balance/:username",
   LEAVEDASHBOARD: "/leave-dashboard",
-  APPROVEDLEAVES: "/approved-leaves",
+  APPROVED: "/approved",
 };

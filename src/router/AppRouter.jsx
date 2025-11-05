@@ -18,7 +18,7 @@ import LeaveRequestForm from "../pages/LeaveRequestForm";
 import PermissionRequestForm from "../components/PermissionRequestForm";
 import BalanceCheck from "../components/BalanceCheck";
 import LeaveDashboard from "../components/leave/LeaveDashboard";
-import ApprovedLeaves from "../components/leave/ApprovedLeaves.JSX";
+import Approved from "../components/leave/Approved";
 
 export default function AppRouter() {
   return (
@@ -54,7 +54,7 @@ export default function AppRouter() {
           />
           <Route path={ROUTES.BALANCECHECK} element={<BalanceCheck />} />
           <Route path={ROUTES.LEAVEDASHBOARD} element={<LeaveDashboard />} />
-          <Route path={ROUTES.APPROVEDLEAVES} element={<ApprovedLeaves />} />
+          <Route path={ROUTES.APPROVED} element={<Approved />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function ApprovedLeaves() {
+export default function Approved() {
   const username = localStorage.getItem("name"); // get logged-in user
   const [leaves, setLeaves] = useState([]);
   const [error, setError] = useState("");

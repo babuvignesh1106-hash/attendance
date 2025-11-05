@@ -19,7 +19,7 @@ export default function LeaveDashboard({ setActivePage }) {
       title: "Approved Leaves",
       desc: "View all your approved leaves.",
       color: "from-purple-500 to-pink-500",
-      route: ROUTES.APPROVEDLEAVES,
+      route: ROUTES.APPROVED,
     },
   ];
 
