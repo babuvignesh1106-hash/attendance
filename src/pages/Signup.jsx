@@ -23,7 +23,7 @@ export default function Signup() {
   const signupMutation = useMutation({
     mutationFn: async (data) => {
       const res = await axios.post(
-        "https://attendance-nine-beryl.vercel.app/auth/signup",
+        "https://attendance-backend-bqhw.vercel.app/auth/signup",
         {
           name: data.Name,
           email: data.Email,
