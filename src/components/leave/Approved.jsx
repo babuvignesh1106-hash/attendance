@@ -22,24 +22,6 @@ export default function Approved() {
     if (username) fetchLeaves();
   }, [username]);
 
-  const handleStatusChange = async (index, newStatus) => {
-    const leave = leaves[index];
-    try {
-      await axios.put(
-        `https://attendance-backend-bqhw.vercel.app/leaves/${leave.id}`,
-        {
-          status: newStatus,
-        }
-      );
-      const updatedLeaves = [...leaves];
-      updatedLeaves[index].status = newStatus;
-      setLeaves(updatedLeaves);
-    } catch (err) {
-      console.error("Failed to update status", err);
-      alert("Failed to update status. Try again.");
-    }
-  };
-
   const filteredLeaves =
     statusFilter === "All"
       ? leaves
@@ -92,21 +74,16 @@ export default function Approved() {
                   </td>
                   <td className="p-3 border border-gray-200">{leave.toDate}</td>
                   <td className="p-3 border border-gray-200">{leave.reason}</td>
-                  <td className="p-3 border border-gray-200">
-                    <select
-                      value={leave.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          leaves.findIndex((l) => l.id === leave.id),
-                          e.target.value
-                        )
-                      }
-                      className="border border-gray-300 rounded px-2 py-1"
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Approved">Approved</option>
-                      <option value="Rejected">Rejected</option>
-                    </select>
+                  <td
+                    className={`p-3 border border-gray-200 font-semibold ${
+                      leave.status === "Approved"
+                        ? "text-green-600"
+                        : leave.status === "Rejected"
+                        ? "text-red-600"
+                        : "text-yellow-600"
+                    }`}
+                  >
+                    {leave.status}
                   </td>
                 </tr>
               ))
