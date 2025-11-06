@@ -12,10 +12,9 @@ export default function LeaveRequestForm() {
 
   const [totalDays, setTotalDays] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showBalance, setShowBalance] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [balanceData, setBalanceData] = useState(null);
 
-  // Populate employee name from localStorage
   useEffect(() => {
     const storedName = localStorage.getItem("name");
     if (storedName) {
@@ -23,7 +22,6 @@ export default function LeaveRequestForm() {
     }
   }, []);
 
-  // Calculate total leave days
   useEffect(() => {
     if (formData.fromDate && formData.toDate) {
       const from = new Date(formData.fromDate);
@@ -39,6 +37,7 @@ export default function LeaveRequestForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrorMessage(""); // clear error when user starts typing
   };
 
   const handleSubmit = async (e) => {
@@ -51,21 +50,19 @@ export default function LeaveRequestForm() {
       !formData.toDate ||
       !formData.reason
     ) {
-      alert("Please fill all required fields before submitting.");
+      setErrorMessage("Please fill all required fields before submitting.");
       return;
     }
 
     try {
-      const response = await axios.post(
+      await axios.post(
         "https://attendance-backend-bqhw.vercel.app/leaves",
         formData
       );
 
-      if (response.data.message) {
-        alert(response.data.message);
-      }
-
       setShowSuccess(true);
+      setErrorMessage("");
+
       setTimeout(() => setShowSuccess(false), 4000);
 
       setFormData({
@@ -77,20 +74,16 @@ export default function LeaveRequestForm() {
       });
       setTotalDays(0);
 
-      // Refresh balance after submission
       handleBalanceClick();
     } catch (error) {
       console.error("Error submitting leave:", error);
-      alert("Error submitting leave request. Please try again.");
+      setErrorMessage("Error submitting leave request. Please try again.");
     }
   };
 
   const today = new Date().toISOString().split("T")[0];
 
-  // Always fetch fresh balance from backend
   const handleBalanceClick = async () => {
-    setShowBalance((prev) => !prev);
-
     try {
       const name = localStorage.getItem("name");
       if (!name) throw new Error("User name not found in localStorage");
@@ -107,7 +100,6 @@ export default function LeaveRequestForm() {
 
   return (
     <div className="min-h-screen flex items-start justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4 py-6 relative">
-      {/* Leave Form */}
       <div className="w-full max-w-md">
         <form
           onSubmit={handleSubmit}
@@ -120,6 +112,12 @@ export default function LeaveRequestForm() {
           {showSuccess && (
             <div className="mb-4 text-center text-green-600 font-semibold">
               ✅ Leave request submitted successfully!
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="mb-4 text-center text-red-600 font-semibold">
+              ⚠️ {errorMessage}
             </div>
           )}
 
