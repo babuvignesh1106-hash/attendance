@@ -14,6 +14,8 @@ import PermissionRequestForm from "../components/PermissionRequestForm";
 import BalanceCheck from "../components/BalanceCheck";
 import LeaveDashboard from "../components/leave/LeaveDashboard";
 import Approved from "../components/leave/Approved";
+import PermissionDashboard from "../components/permission/PermissionDashboard";
+import PermissionRecords from "../components/permission/PermissionRecords";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // sidebar initially closed
@@ -107,6 +109,18 @@ export default function Dashboard() {
               {activePage === ROUTES.APPROVED && (
                 <div className="col-span-8 p-6 rounded-xl  h-full">
                   <Approved />
+                </div>
+              )}
+              {activePage === ROUTES.PERMISSIONDASHBOARD && (
+                <div className="col-span-8 p-6 rounded-xl h-full">
+                  <PermissionDashboard setActivePage={setActivePage} />{" "}
+                  {/* ✅ FIXED */}
+                </div>
+              )}
+              {activePage === ROUTES.PERMISSIONRECORDS && (
+                <div className="col-span-8 p-6 rounded-xl h-full">
+                  <PermissionRecords setActivePage={setActivePage} />{" "}
+                  {/* ✅ FIXED */}
                 </div>
               )}
             </div>

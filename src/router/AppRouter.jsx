@@ -19,6 +19,8 @@ import PermissionRequestForm from "../components/PermissionRequestForm";
 import BalanceCheck from "../components/BalanceCheck";
 import LeaveDashboard from "../components/leave/LeaveDashboard";
 import Approved from "../components/leave/Approved";
+import PermissionDashboard from "../components/permission/PermissionDashboard";
+import PermissionRecords from "../components/permission/PermissionRecords";
 
 export default function AppRouter() {
   return (
@@ -55,6 +57,14 @@ export default function AppRouter() {
           <Route path={ROUTES.BALANCECHECK} element={<BalanceCheck />} />
           <Route path={ROUTES.LEAVEDASHBOARD} element={<LeaveDashboard />} />
           <Route path={ROUTES.APPROVED} element={<Approved />} />
+          <Route
+            path={ROUTES.PERMISSIONDASHBOARD}
+            element={<PermissionDashboard />}
+          />
+          <Route
+            path={ROUTES.PERMISSIONRECORDS}
+            element={<PermissionRecords />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>

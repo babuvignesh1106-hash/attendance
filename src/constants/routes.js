@@ -23,4 +23,6 @@ export const ROUTES = {
   BALANCECHECK: "/leaves/balance/:username",
   LEAVEDASHBOARD: "/leave-dashboard",
   APPROVED: "/approved",
+  PERMISSIONDASHBOARD: "/permission-dashboard",
+  PERMISSIONRECORDS: "/permission-records",
 };
