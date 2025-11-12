@@ -10,8 +10,8 @@ export default function PermissionDashboard({ setActivePage }) {
       route: ROUTES.PERMISSIONREQUESTFORM,
     },
     {
-      title: "Approved Permissions",
-      desc: "View all your approved permissions.",
+      title: "Approved Records",
+      desc: "View all your Permission record.",
       color: "from-purple-500 to-pink-500",
       route: ROUTES.PERMISSIONRECORDS,
     },

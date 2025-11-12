@@ -14,13 +14,15 @@ export const useAttendanceStore = create(
       breakCount: 0,
       breakStart: null,
       breakElapsed: 0,
-      date: new Date().toDateString(), // 🔹 Store the current date
+      date: new Date().toDateString(), // store current date
 
       // ✅ CHECK-IN
       checkIn: () => {
         if (get().isCheckedIn) return;
 
         const now = Date.now();
+
+        // 🕒 Start real-time timer
         const interval = setInterval(() => {
           const nowTime = Date.now();
           let workedTime = nowTime - get().startTime - get().breakElapsed;
@@ -32,9 +34,16 @@ export const useAttendanceStore = create(
 
           set({ elapsedTime: workedTime });
 
-          // 🔹 Check if date changed (crossed midnight)
-          const currentDate = new Date().toDateString();
-          if (get().date !== currentDate) {
+          // 🔹 Detect date change (crossed midnight)
+          const storedDate = new Date(get().date);
+          const currentDate = new Date();
+          const isDateChanged =
+            storedDate.getDate() !== currentDate.getDate() ||
+            storedDate.getMonth() !== currentDate.getMonth() ||
+            storedDate.getFullYear() !== currentDate.getFullYear();
+
+          if (isDateChanged) {
+            console.log("🕛 Date changed → Auto check-out triggered!");
             get().autoCheckOutOnDateChange();
           }
         }, 1000);
@@ -69,11 +78,10 @@ export const useAttendanceStore = create(
 
         try {
           const username = localStorage.getItem("name") || "unknown";
-
           const data = {
             startTime: new Date(startTime).toISOString(),
             endTime: new Date().toISOString(),
-            workedDuration: Math.floor(elapsedTime / 1000), // seconds
+            workedDuration: Math.floor(elapsedTime / 1000), // in seconds
             breakCount,
             totalBreakDuration: Math.floor(breakElapsed / 1000),
             username,
@@ -83,10 +91,13 @@ export const useAttendanceStore = create(
             "https://attendance-backend-bqhw.vercel.app/attendance",
             data
           );
+
+          console.log("✅ Auto checkout completed and data saved!");
         } catch (error) {
-          console.error("Attendance check-out failed:", error);
+          console.error("❌ Attendance check-out failed:", error);
         }
 
+        // 🧹 Reset after checkout
         set({
           isCheckedIn: false,
           startTime: null,
@@ -100,9 +111,10 @@ export const useAttendanceStore = create(
         });
       },
 
-      // ✅ AUTO CHECKOUT when date changes
+      // ✅ AUTO CHECKOUT on date change
       autoCheckOutOnDateChange: async () => {
-        console.log("🕛 Auto checkout triggered at midnight!");
+        const { timerInterval } = get();
+        if (timerInterval) clearInterval(timerInterval); // stop running timer
         await get().checkOut();
       },
 
@@ -145,9 +157,7 @@ export const useAttendanceStore = create(
 
       // ✅ RESUME TIMER (AFTER PAGE REFRESH)
       resumeTimer: () => {
-        if (!get().isCheckedIn) return;
-
-        if (get().timerInterval) clearInterval(get().timerInterval);
+        if (!get().isCheckedIn || get().timerInterval) return; // prevent duplicate intervals
 
         const interval = setInterval(() => {
           const now = Date.now();
@@ -160,9 +170,16 @@ export const useAttendanceStore = create(
 
           set({ elapsedTime: workedTime });
 
-          // 🔹 Check if date changed
-          const currentDate = new Date().toDateString();
-          if (get().date !== currentDate) {
+          // 🔹 Check for date change
+          const storedDate = new Date(get().date);
+          const currentDate = new Date();
+          const isDateChanged =
+            storedDate.getDate() !== currentDate.getDate() ||
+            storedDate.getMonth() !== currentDate.getMonth() ||
+            storedDate.getFullYear() !== currentDate.getFullYear();
+
+          if (isDateChanged) {
+            console.log("🕛 Date changed → Auto check-out triggered!");
             get().autoCheckOutOnDateChange();
           }
         }, 1000);
@@ -185,3 +202,11 @@ export const useAttendanceStore = create(
     }
   )
 );
+
+// 🧼 Optional cleanup when tab closes (stops interval safely)
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeunload", () => {
+    const { timerInterval } = useAttendanceStore.getState();
+    if (timerInterval) clearInterval(timerInterval);
+  });
+}
