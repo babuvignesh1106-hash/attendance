@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaTachometerAlt,
   FaChevronDown,
@@ -11,6 +11,13 @@ import { ROUTES } from "../../constants/routes";
 
 const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
   const [openPermission, setOpenPermission] = useState(false);
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    // ✅ Get role from localStorage
+    const storedRole = localStorage.getItem("role") || "employee";
+    setRole(storedRole);
+  }, []);
 
   const permissionItems = [
     { label: "Leave Request", route: ROUTES.LEAVEDASHBOARD },
@@ -39,13 +46,15 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
         active={activePage === ROUTES.CALENDARGRID}
       />
 
-      {/* Admin */}
-      <EmpSidebarItem
-        icon={<FaTable />}
-        label="Admin"
-        onClick={() => onNavigate(ROUTES.ADMIN)}
-        active={activePage === ROUTES.ADMIN}
-      />
+      {/* ✅ Admin - Directly navigate to Admin Dashboard */}
+      {role === "admin" && (
+        <EmpSidebarItem
+          icon={<FaTable />}
+          label="Admin Dashboard"
+          onClick={() => onNavigate(ROUTES.ADMINDASHBOARD)}
+          active={activePage === ROUTES.ADMINDASHBOARD}
+        />
+      )}
 
       {/* Permission Dropdown */}
       <div className="mx-2 mt-3">

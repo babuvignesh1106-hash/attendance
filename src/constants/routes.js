@@ -25,4 +25,5 @@ export const ROUTES = {
   APPROVED: "/approved",
   PERMISSIONDASHBOARD: "/permission-dashboard",
   PERMISSIONRECORDS: "/permission-records",
+  ADMINDASHBOARD: "/admindashboard",
 };

@@ -7,7 +7,7 @@ import EmpSidebar from "../components/sidebar/EmpSidebar";
 import EmpSidebarItem from "../components/sidebar/EmpSidebarItem";
 import CalendarGrid from "../components/calendar/CalendarGrid";
 import WeeklyStatusChart from "../components/WeeklyStatusChart";
-import Admin from "../components/admin/Admin";
+
 import Calendar from "../components/calendar/Calendar";
 import EmployeePopup from "../components/calendar/EmployeePopup";
 import Login from "../pages/Login/Login";
@@ -21,6 +21,7 @@ import LeaveDashboard from "../components/leave/LeaveDashboard";
 import Approved from "../components/leave/Approved";
 import PermissionDashboard from "../components/permission/PermissionDashboard";
 import PermissionRecords from "../components/permission/PermissionRecords";
+import AdminDashboard from "../components/admin/AdminDashboard";
 
 export default function AppRouter() {
   return (
@@ -44,10 +45,10 @@ export default function AppRouter() {
             path={ROUTES.WEEKLYSTATUSCHART}
             element={<WeeklyStatusChart />}
           />
-          <Route path={ROUTES.ADMIN} element={<Admin />} />
+
           <Route path={ROUTES.CHECKOUT} element={<CheckOutDialog />} />
           <Route
-            path={ROUTES.LeaveRequestForm}
+            path={ROUTES.LEAVEREQUESTFORM}
             element={<LeaveRequestForm />}
           />
           <Route
@@ -65,6 +66,7 @@ export default function AppRouter() {
             path={ROUTES.PERMISSIONRECORDS}
             element={<PermissionRecords />}
           />
+          <Route path={ROUTES.ADMINDASHBOARD} element={<AdminDashboard />} />
         </Route>
       </Routes>
     </BrowserRouter>

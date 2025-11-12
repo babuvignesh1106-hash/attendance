@@ -4,14 +4,21 @@ import Logo from "../assets/logo.png";
 export default function EmployeeDetails() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [designation, setDesignation] = useState("");
+  const [employeeId, setEmployeeId] = useState("");
 
   useEffect(() => {
-    // Get name and email from localStorage after login
+    // Get details from localStorage after login
     const storedName = localStorage.getItem("name") || "Employee";
     const storedEmail = localStorage.getItem("email") || "example@mail.com";
+    const storedDesignation =
+      localStorage.getItem("designation") || "Software Engineer";
+    const storedEmployeeId = localStorage.getItem("employeeId") || "EMP123";
 
     setName(storedName);
     setEmail(storedEmail);
+    setDesignation(storedDesignation);
+    setEmployeeId(storedEmployeeId);
   }, []);
 
   return (
@@ -39,10 +46,10 @@ export default function EmployeeDetails() {
           <span className="font-bold">Email:</span> {email}
         </p>
         <p>
-          <span className="font-bold">Role:</span> Software Engineer
+          <span className="font-bold">Designation:</span> {designation}
         </p>
         <p>
-          <span className="font-bold">Employee ID:</span> EMP123
+          <span className="font-bold">Employee ID:</span> {employeeId}
         </p>
       </div>
     </div>

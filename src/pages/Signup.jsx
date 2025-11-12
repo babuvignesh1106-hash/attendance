@@ -11,10 +11,13 @@ export default function Signup() {
     Name: "",
     Email: "",
     Password: "",
+    Role: "",
+    Designation: "",
+    EmployeeId: "",
   });
+
   const [dialog, setDialog] = useState({ isOpen: false, message: "" });
 
-  // Redirect if already logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) navigate("/dashboard");
@@ -28,6 +31,9 @@ export default function Signup() {
           name: data.Name,
           email: data.Email,
           password: data.Password,
+          role: data.Role,
+          designation: data.Designation,
+          employeeId: data.EmployeeId,
         }
       );
       return res.data;
