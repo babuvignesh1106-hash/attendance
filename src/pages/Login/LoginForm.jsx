@@ -3,31 +3,46 @@ import logo from "../../../src/assets/logo.png";
 
 export default function LoginForm({ handleChange, handleSubmit, formData }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 via-blue-300 to-blue-400 px-4 py-8 rounded-3xl">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 space-y-6"
+        className="w-full max-w-md bg-white shadow-2xl border border-gray-200 p-8 space-y-6 rounded-lg transition-transform duration-300 hover:scale-[1.01]"
       >
-        <div className="flex justify-center">
-          <img src={logo} alt="Logo" className="h-28 w-auto" />
+        {/* Logo */}
+        <div className="flex justify-center mb-2">
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-20 w-auto drop-shadow-md hover:scale-105 transition-transform duration-300"
+          />
         </div>
 
+        <h2 className="text-2xl font-bold text-center text-gray-800 uppercase tracking-wide">
+          Welcome Back
+        </h2>
+        <p className="text-center text-gray-500 text-sm mb-4">
+          Please sign in to continue
+        </p>
+
+        {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
             {LABELS.EMAIL}
           </label>
           <input
             type="email"
             name="Email"
-            placeholder="you@example.com"
+            placeholder="you@ascentwarecorp.com"
             onChange={handleChange}
             value={formData.Email}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+            required
+            className="w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
           />
         </div>
 
+        {/* Password */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">
             {LABELS.PASSWORD}
           </label>
           <input
@@ -36,13 +51,15 @@ export default function LoginForm({ handleChange, handleSubmit, formData }) {
             placeholder="Enter your password"
             onChange={handleChange}
             value={formData.Password}
-            className="w-full border border-gray-300 rounded-xl px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+            required
+            className="w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent text-sm"
           />
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition duration-200"
+          className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition-all duration-300"
         >
           Sign In
         </button>

@@ -1,5 +1,3 @@
-// src/routes/AppRouter.jsx
-import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom"; // ✅ Correct import
 import { ROUTES } from "../constants/routes";
 import Dashboard from "../pages/Dashboard";
@@ -7,7 +5,6 @@ import EmpSidebar from "../components/sidebar/EmpSidebar";
 import EmpSidebarItem from "../components/sidebar/EmpSidebarItem";
 import CalendarGrid from "../components/calendar/CalendarGrid";
 import WeeklyStatusChart from "../components/WeeklyStatusChart";
-
 import Calendar from "../components/calendar/Calendar";
 import EmployeePopup from "../components/calendar/EmployeePopup";
 import Login from "../pages/Login/Login";
@@ -22,6 +19,13 @@ import Approved from "../components/leave/Approved";
 import PermissionDashboard from "../components/permission/PermissionDashboard";
 import PermissionRecords from "../components/permission/PermissionRecords";
 import AdminDashboard from "../components/admin/AdminDashboard";
+import PayrollDashboard from "../components/payslip/PayrollDashboard";
+import GeneratePayslip from "../components/payslip/GeneratePayslip";
+import PayslipForm from "../components/payslip/PayslipForm";
+import StaffForm from "../components/staff/StaffForm";
+import StaffEdit from "../components/staff/StaffEdit";
+import StaffList from "../components/staff/StaffList";
+import StaffTable from "../components/staff/StaffTable";
 
 export default function AppRouter() {
   return (
@@ -67,6 +71,16 @@ export default function AppRouter() {
             element={<PermissionRecords />}
           />
           <Route path={ROUTES.ADMINDASHBOARD} element={<AdminDashboard />} />
+          <Route
+            path={ROUTES.PAYROLL_DASHBOARD}
+            element={<PayrollDashboard />}
+          />
+          <Route path={ROUTES.PAYROLL_GENERATE} element={<GeneratePayslip />} />
+          <Route path={ROUTES.PAYSLIPFORM} element={<PayslipForm />} />
+          <Route path={ROUTES.STAFF_FORM} element={<StaffForm />} />
+          <Route path={ROUTES.STAFF_EDIT} element={<StaffEdit />} />
+          <Route path={ROUTES.STAFF_LIST} element={<StaffList />} />
+          <Route path={ROUTES.STAFF_TABLE} element={<StaffTable />} />
         </Route>
       </Routes>
     </BrowserRouter>

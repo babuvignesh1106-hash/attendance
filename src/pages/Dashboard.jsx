@@ -17,6 +17,13 @@ import Approved from "../components/leave/Approved";
 import PermissionDashboard from "../components/permission/PermissionDashboard";
 import PermissionRecords from "../components/permission/PermissionRecords";
 import AdminDashboard from "../components/admin/AdminDashboard";
+import PayrollDashboard from "../components/payslip/PayrollDashboard";
+import GeneratePayslip from "../components/payslip/GeneratePayslip";
+import PayslipForm from "../components/payslip/PayslipForm";
+import StaffForm from "../components/staff/StaffForm";
+import StaffTable from "../components/staff/StaffTable";
+import StaffList from "../components/staff/StaffList";
+import StaffEdit from "../components/staff/StaffEdit";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -78,7 +85,7 @@ export default function Dashboard() {
                   </div>
 
                   {/* ✅ Weekly Chart */}
-                  <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col">
+                  <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col ">
                     <WeeklyStatusChart />
                   </div>
 
@@ -145,6 +152,44 @@ export default function Dashboard() {
               {activePage === ROUTES.ADMINDASHBOARD && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <AdminDashboard setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.PAYROLL_DASHBOARD && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <PayrollDashboard setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.PAYSLIPFORM && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <PayslipForm setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.PAYROLL_GENERATE && selectedPayslip && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <GeneratePayslip
+                    payslipData={selectedPayslip} // ✅ pass data directly
+                    setActivePage={setActivePage}
+                  />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_FORM && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffForm setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_TABLE && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffTable setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_LIST && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffList setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_EDIT && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffEdit setActivePage={setActivePage} />
                 </div>
               )}
             </div>

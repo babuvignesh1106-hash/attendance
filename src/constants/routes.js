@@ -26,4 +26,11 @@ export const ROUTES = {
   PERMISSIONDASHBOARD: "/permission-dashboard",
   PERMISSIONRECORDS: "/permission-records",
   ADMINDASHBOARD: "/admindashboard",
+  PAYROLL_DASHBOARD: "/payroll-dashboard",
+  PAYROLL_GENERATE: "/payroll-generate",
+  PAYSLIPFORM: "/payslip-form",
+  STAFF_FORM: "/staff-form",
+  STAFF_EDIT: "/staff/edit/:id",
+  STAFF_LIST: "/staff",
+  STAFF_TABLE: "/staff-table",
 };

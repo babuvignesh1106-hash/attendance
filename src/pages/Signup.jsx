@@ -39,11 +39,17 @@ export default function Signup() {
       return res.data;
     },
     onSuccess: () => {
-      setDialog({ isOpen: true, message: "Signup successful! Redirecting..." });
-      setTimeout(() => navigate("/"), 1000);
+      setDialog({
+        isOpen: true,
+        message: "🎉 Signup successful! Redirecting...",
+      });
+      setTimeout(() => navigate("/"), 1200);
     },
     onError: () =>
-      setDialog({ isOpen: true, message: "Signup failed. Please try again." }),
+      setDialog({
+        isOpen: true,
+        message: "❌ Signup failed. Please try again.",
+      }),
   });
 
   const handleChange = (e) => {

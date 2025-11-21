@@ -20,7 +20,7 @@ const WEEKEND_YELLOW = "#fffa93";
 const INACTIVE_GRAY = "#d1d5db";
 const GRID_COLOR = "#e5e7eb";
 
-// ✅ Custom X-Axis Label
+// X-axis Tick
 const CustomXAxisTick = ({ x, y, payload }) => {
   const isWeekend = payload.value === "Sat" || payload.value === "Sun";
   return (
@@ -37,7 +37,7 @@ const CustomXAxisTick = ({ x, y, payload }) => {
   );
 };
 
-// ✅ Tooltip
+// Tooltip
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const { workedDuration, breakCount } = payload[0].payload;
@@ -52,7 +52,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-// ✅ Get start of week (Monday)
+// Week start (Monday)
 const getStartOfWeek = (date) => {
   const d = new Date(date);
   const day = d.getDay();
@@ -62,7 +62,7 @@ const getStartOfWeek = (date) => {
   return d;
 };
 
-// ✅ Check if a date is in the same week
+// Check if same week
 const isDateInWeek = (date, weekStart) => {
   const start = new Date(weekStart);
   const end = new Date(start);
@@ -71,7 +71,7 @@ const isDateInWeek = (date, weekStart) => {
   return d >= start && d <= end;
 };
 
-// ✅ Format week range
+// Week label
 const formatWeekRange = (startDate) => {
   const end = new Date(startDate);
   end.setDate(startDate.getDate() + 6);
@@ -92,14 +92,16 @@ export default function WeeklyStatusChart() {
   useEffect(() => {
     const fetchAttendance = async () => {
       setLoading(true);
+
       try {
         const res = await axios.get(
           "https://attendance-backend-bqhw.vercel.app/attendance"
         );
+
         const attendanceData = res.data || [];
 
         if (!storedUsername) {
-          console.warn("⚠️ No stored username found in localStorage");
+          console.warn("⚠ No username found in localStorage");
           setData([]);
           setLoading(false);
           return;
@@ -122,8 +124,8 @@ export default function WeeklyStatusChart() {
           Sun: { workedDuration: 0, breakCount: 0 },
         };
 
-        // Group by date
         const groupedByDate = {};
+
         userData.forEach((entry) => {
           const dateKey = new Date(entry.startTime).toDateString();
           if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
@@ -147,6 +149,7 @@ export default function WeeklyStatusChart() {
           );
 
           const workedHours = totalWorkedSeconds / 3600;
+
           if (weekData[weekday]) {
             weekData[weekday].workedDuration += workedHours;
             weekData[weekday].breakCount += totalBreakCount;
@@ -209,9 +212,11 @@ export default function WeeklyStatusChart() {
           >
             <IoChevronBack className="text-xl text-gray-700" />
           </button>
+
           <span className="text-lg font-semibold text-gray-700">
             {weekLabel}
           </span>
+
           <button
             onClick={handleNextWeek}
             className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full shadow"
@@ -220,13 +225,21 @@ export default function WeeklyStatusChart() {
           </button>
         </div>
 
+        {/* CHART */}
         <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={data} barGap={4}>
+          <BarChart
+            data={data}
+            barGap={6} // IMPORTANT
+            barCategoryGap="10%" // IMPORTANT
+          >
             <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} />
+
             <XAxis dataKey="day" tick={<CustomXAxisTick />} />
+
             <YAxis
               type="number"
               domain={[0, 14]}
+              allowDecimals={false} // IMPORTANT
               ticks={[0, 2, 4, 6, 8, 10, 12, 14]}
               tick={{ fill: "#374151", fontSize: 14, fontWeight: "bold" }}
             >
@@ -248,11 +261,13 @@ export default function WeeklyStatusChart() {
             <Bar
               dataKey="workedDuration"
               radius={[6, 6, 0, 0]}
-              minPointSize={20}
+              minPointSize={6} // FIX for hover on zero-value days
+              isAnimationActive={false} // Prevent hiding during animation
             >
               {data.map((entry, index) => {
                 const isWeekend = entry.day === "Sat" || entry.day === "Sun";
                 const isNonWorking = entry.workedDuration === 0;
+
                 const dayIndex = [
                   "Mon",
                   "Tue",
@@ -262,8 +277,10 @@ export default function WeeklyStatusChart() {
                   "Sat",
                   "Sun",
                 ].indexOf(entry.day);
+
                 const entryDate = new Date(weekStart);
                 entryDate.setDate(weekStart.getDate() + dayIndex);
+
                 const isFuture = entryDate > today;
 
                 let fillColor;
@@ -271,22 +288,24 @@ export default function WeeklyStatusChart() {
                 else if (isWeekend || isNonWorking) fillColor = WEEKEND_YELLOW;
                 else fillColor = WEEKDAY_BLUE;
 
-                return <Cell key={`bar-${index}`} fill={fillColor} />;
+                return <Cell key={index} fill={fillColor} />;
               })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
 
-        {/* 🎨 Color Legend */}
+        {/* Color Legend */}
         <div className="flex justify-center items-center gap-6 mt-6 text-sm font-medium text-gray-700">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-[#7dd3fc] border" />
             <span>Worked Days</span>
           </div>
+
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-[#fffa93] border" />
             <span>Non-working / Weekend</span>
           </div>
+
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-[#d1d5db] border" />
             <span>Future Days</span>

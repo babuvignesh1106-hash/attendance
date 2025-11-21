@@ -6,7 +6,7 @@ import LeaveTable from "./LeaveTable";
 import PermissionTable from "./PermissionTable";
 import { motion } from "framer-motion";
 
-export default function AdminDashboard({ onLogout }) {
+export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState(""); // "", "attendance", "leaves", "permission"
   const [attendanceData, setAttendanceData] = useState([]);
   const [leaveData, setLeaveData] = useState([]);
@@ -142,15 +142,6 @@ export default function AdminDashboard({ onLogout }) {
             </motion.div>
           ))}
         </div>
-
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={onLogout}
-          className="mt-12 bg-red-600 text-white py-2 px-8 rounded-full shadow-lg hover:bg-red-700 transition-all duration-200"
-        >
-          Logout
-        </motion.button>
       </div>
     );
 
