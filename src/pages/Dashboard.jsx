@@ -1,0 +1,201 @@
+import { useState, useEffect } from "react";
+import { useAttendanceStore } from "../store/attendanceStore";
+import EmployeeDetails from "../components/EmployeeDetails";
+import TodaySummary from "../components/TodaySummary";
+import BreakTime from "../components/BreakTime";
+import Navbar from "../components/Navbar";
+import EmpSidebar from "../components/sidebar/EmpSidebar";
+import WeeklyStatusChart from "../components/WeeklyStatusChart";
+import { ROUTES } from "../constants/routes";
+import CalendarGrid from "../components/calendar/CalendarGrid";
+
+import LeaveRequestForm from "./LeaveRequestForm";
+import PermissionRequestForm from "../components/PermissionRequestForm";
+import BalanceCheck from "../components/BalanceCheck";
+import LeaveDashboard from "../components/leave/LeaveDashboard";
+import Approved from "../components/leave/Approved";
+import PermissionDashboard from "../components/permission/PermissionDashboard";
+import PermissionRecords from "../components/permission/PermissionRecords";
+import AdminDashboard from "../components/admin/AdminDashboard";
+import PayrollDashboard from "../components/payslip/PayrollDashboard";
+import GeneratePayslip from "../components/payslip/GeneratePayslip";
+import PayslipForm from "../components/payslip/PayslipForm";
+import StaffForm from "../components/staff/StaffForm";
+import StaffTable from "../components/staff/StaffTable";
+import StaffList from "../components/staff/StaffList";
+import StaffEdit from "../components/staff/StaffEdit";
+
+export default function Dashboard() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activePage, setActivePage] = useState(ROUTES.DASHBOARD);
+  const resumeTimer = useAttendanceStore((state) => state.resumeTimer);
+
+  useEffect(() => {
+    resumeTimer();
+  }, [resumeTimer]);
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* ✅ Navbar */}
+      <header className="w-full fixed top-0 left-0 z-50 shadow-md bg-white">
+        <Navbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      </header>
+
+      <div className="flex pt-[70px]">
+        {/* ✅ Sidebar */}
+        <div
+          className={`fixed top-[70px] left-0 h-[calc(100vh-70px)]  transition-all duration-300 overflow-hidden z-40
+            ${isSidebarOpen ? "w-64" : "w-0 md:w-64"}
+          `}
+        >
+          <EmpSidebar
+            isOpen={isSidebarOpen}
+            onNavigate={setActivePage}
+            activePage={activePage}
+          />
+        </div>
+
+        {/* ✅ Main Content */}
+        <div
+          className={`flex-1 transition-all duration-300 ${
+            isSidebarOpen ? "ml-0 md:ml-64" : "ml-0"
+          }`}
+        >
+          <main className="relative p-3 sm:p-6 md:p-8 overflow-y-auto origin-top scale-100 md:scale-[0.95] lg:scale-[0.9] xl:scale-[0.9]">
+            <div
+              className="
+                grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4 sm:gap-6
+              "
+            >
+              {activePage === ROUTES.DASHBOARD && (
+                <>
+                  {/* ✅ Employee Details */}
+                  <div className="col-span-1 sm:col-span-2 bg-white p-4 rounded-xl shadow-md flex flex-col">
+                    <EmployeeDetails />
+                  </div>
+
+                  {/* ✅ Break Time */}
+                  <div className="col-span-1 sm:col-span-2 bg-white p-4 rounded-xl shadow-md flex flex-col">
+                    <BreakTime />
+                  </div>
+
+                  {/* ✅ Today Summary */}
+                  <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col">
+                    <TodaySummary />
+                  </div>
+
+                  {/* ✅ Weekly Chart */}
+                  <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col ">
+                    <WeeklyStatusChart />
+                  </div>
+
+                  {/* ✅ Calendar */}
+                  <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col pointer-events-none">
+                    <CalendarGrid />
+                  </div>
+                </>
+              )}
+
+              {activePage === ROUTES.CALENDARGRID && (
+                <div className="col-span-1 lg:col-span-8 bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                  <CalendarGrid />
+                </div>
+              )}
+
+              {activePage === ROUTES.ADMIN && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <Admin />
+                </div>
+              )}
+
+              {activePage === ROUTES.LEAVEDASHBOARD && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <LeaveDashboard setActivePage={setActivePage} />
+                </div>
+              )}
+
+              {activePage === ROUTES.PERMISSIONREQUESTFORM && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <PermissionRequestForm />
+                </div>
+              )}
+
+              {activePage === ROUTES.BALANCECHECK && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <BalanceCheck />
+                </div>
+              )}
+
+              {activePage === ROUTES.LEAVEREQUESTFORM && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <LeaveRequestForm />
+                </div>
+              )}
+
+              {activePage === ROUTES.APPROVED && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <Approved />
+                </div>
+              )}
+
+              {activePage === ROUTES.PERMISSIONDASHBOARD && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <PermissionDashboard setActivePage={setActivePage} />
+                </div>
+              )}
+
+              {activePage === ROUTES.PERMISSIONRECORDS && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <PermissionRecords setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.ADMINDASHBOARD && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <AdminDashboard setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.PAYROLL_DASHBOARD && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <PayrollDashboard setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.PAYSLIPFORM && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <PayslipForm setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.PAYROLL_GENERATE && selectedPayslip && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <GeneratePayslip
+                    payslipData={selectedPayslip} // ✅ pass data directly
+                    setActivePage={setActivePage}
+                  />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_FORM && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffForm setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_TABLE && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffTable setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_LIST && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffList setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_EDIT && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffEdit setActivePage={setActivePage} />
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
