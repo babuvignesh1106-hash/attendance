@@ -30,7 +30,9 @@ const PayrollDashboard = () => {
 
   const fetchPayslips = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/payslip");
+      const res = await axios.get(
+        "https://attendance-backend-bqhw.vercel.app/payslip"
+      );
       setPayslips(res.data);
     } catch (err) {
       console.error(err);

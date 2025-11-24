@@ -14,7 +14,7 @@ export default function StaffEdit({ setActivePage }) {
 
   useEffect(() => {
     if (!staffId) return;
-    fetch(`http://localhost:8000/staff/${staffId}`)
+    fetch(`https://attendance-backend-bqhw.vercel.app/staff/${staffId}`)
       .then((res) => res.json())
       .then((data) => setForm(data));
   }, [staffId]);
@@ -25,11 +25,14 @@ export default function StaffEdit({ setActivePage }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch(`http://localhost:8000/staff/${staffId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      await fetch(
+        `https://attendance-backend-bqhw.vercel.app/staff/${staffId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }
+      );
       alert("Staff updated successfully!");
       if (setActivePage) setActivePage("STAFF_LIST");
     } catch (err) {

@@ -19,7 +19,9 @@ export default function PayslipForm({ onSuccess }) {
   useEffect(() => {
     const fetchStaff = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/staff");
+        const res = await axios.get(
+          "https://attendance-backend-bqhw.vercel.app/staff"
+        );
         setStaffList(res.data);
       } catch (err) {
         console.error("Error fetching staff:", err);
@@ -72,7 +74,10 @@ export default function PayslipForm({ onSuccess }) {
         bonus: form.bonus ? Number(form.bonus) : undefined,
         year: Number(form.year),
       };
-      await axios.post("http://localhost:8000/payslip", payload);
+      await axios.post(
+        "https://attendance-backend-bqhw.vercel.app/payslip",
+        payload
+      );
       alert("Payslip added successfully!");
       if (onSuccess) onSuccess();
     } catch (err) {

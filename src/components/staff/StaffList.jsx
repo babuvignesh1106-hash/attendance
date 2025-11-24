@@ -7,7 +7,9 @@ export default function StaffList({ setActivePage }) {
 
   const fetchStaff = async () => {
     try {
-      const res = await fetch("http://localhost:8000/staff");
+      const res = await fetch(
+        "https://attendance-backend-bqhw.vercel.app/staff"
+      );
       const data = await res.json();
       setStaff(data);
     } catch (err) {
@@ -23,7 +25,9 @@ export default function StaffList({ setActivePage }) {
     if (!window.confirm("Are you sure you want to delete this staff?")) return;
 
     try {
-      await fetch(`http://localhost:8000/staff/${id}`, { method: "DELETE" });
+      await fetch(`https://attendance-backend-bqhw.vercel.app/staff/${id}`, {
+        method: "DELETE",
+      });
       fetchStaff();
     } catch (err) {
       console.log(err);
