@@ -6,7 +6,7 @@ import {
   FaUserShield,
   FaTable,
   FaMoneyCheckAlt,
-  FaUsers, // Added icon for Employees
+  FaUsers,
 } from "react-icons/fa";
 import EmpSidebarItem from "./EmpSidebarItem";
 import { ROUTES } from "../../constants/routes";
@@ -53,17 +53,17 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
         active={activePage === ROUTES.CALENDARGRID}
       />
 
-      {/* Employees */}
-      <EmpSidebarItem
-        icon={<FaUsers />}
-        label="Employees"
-        onClick={() => onNavigate(ROUTES.STAFF_LIST)} // Add this route in your ROUTES
-        active={activePage === ROUTES.STAFF_LIST}
-      />
-
-      {/* Admin-only Section */}
+      {/* ADMIN ONLY SECTION */}
       {role === "admin" && (
         <>
+          {/* Employees */}
+          <EmpSidebarItem
+            icon={<FaUsers />}
+            label="Employees"
+            onClick={() => onNavigate(ROUTES.STAFF_LIST)}
+            active={activePage === ROUTES.STAFF_LIST}
+          />
+
           {/* Admin Dashboard */}
           <EmpSidebarItem
             icon={<FaTable />}
@@ -105,7 +105,17 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
         </>
       )}
 
-      {/* Permission Dropdown */}
+      {/* EMPLOYEE ONLY SECTION */}
+      {role === "employee" && (
+        <EmpSidebarItem
+          icon={<FaMoneyCheckAlt />}
+          label="New Emp Payroll"
+          onClick={() => onNavigate(ROUTES.NEW_EMP_PAY)}
+          active={activePage === ROUTES.NEW_EMP_PAY}
+        />
+      )}
+
+      {/* Permission Dropdown (Visible for ALL roles) */}
       <div className="mx-2 mt-3">
         <button
           className="w-full flex items-center justify-between bg-[#023e8a] px-4 py-3 rounded-lg text-lg font-semibold hover:bg-[#0353a4] transition"

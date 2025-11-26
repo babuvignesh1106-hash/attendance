@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function PayslipForm({ onSuccess }) {
+export default function PayslipForm({ editData, onSuccess }) {
   const [staffList, setStaffList] = useState([]);
-  const [form, setForm] = useState({
+
+  const defaultForm = {
     employeeId: "",
     employeeName: "",
     designation: "",
@@ -13,9 +14,13 @@ export default function PayslipForm({ onSuccess }) {
     dateOfJoining: "",
     month: "",
     year: "",
-  });
+  };
 
-  // Fetch staff data on mount
+  const [form, setForm] = useState(defaultForm);
+
+  // ----------------------------
+  // LOAD STAFF LIST
+  // ----------------------------
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -30,16 +35,32 @@ export default function PayslipForm({ onSuccess }) {
     fetchStaff();
   }, []);
 
-  // Handle changes
+  // ----------------------------
+  // AUTO FILL WHEN EDITING
+  // ----------------------------
+  useEffect(() => {
+    if (editData) {
+      setForm(editData);
+    } else {
+      setForm(defaultForm); // reset for Add mode
+    }
+  }, [editData]);
+
+  // ----------------------------
+  // HANDLE INPUT CHANGES
+  // ----------------------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle employee selection
+  // ----------------------------
+  // WHEN EMPLOYEE SELECTED
+  // ----------------------------
   const handleEmployeeChange = (e) => {
     const empId = Number(e.target.value);
     const selected = staffList.find((s) => s.id === empId);
+
     if (selected) {
       setForm((prev) => ({
         ...prev,
@@ -50,41 +71,43 @@ export default function PayslipForm({ onSuccess }) {
         panCard: selected.pancard,
         dateOfJoining: selected.dateOfJoining,
       }));
-    } else {
-      // Reset if "Select" is chosen
-      setForm((prev) => ({
-        ...prev,
-        employeeId: "",
-        employeeName: "",
-        designation: "",
-        salary: "",
-        panCard: "",
-        dateOfJoining: "",
-      }));
     }
   };
 
-  // Handle form submit
+  // ----------------------------
+  // SUBMIT FORM (ADD / UPDATE)
+  // ----------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const payload = {
         ...form,
         salary: Number(form.salary),
-        bonus: form.bonus ? Number(form.bonus) : undefined,
+        bonus: form.bonus ? Number(form.bonus) : 0,
         year: Number(form.year),
       };
-      await axios.post(
-        "https://attendance-backend-bqhw.vercel.app/payslip",
-        payload
-      );
-      alert("Payslip added successfully!");
+
+      if (editData) {
+        // UPDATE MODE
+        await axios.put(
+          `https://attendance-backend-bqhw.vercel.app/payslip/${editData.id}`,
+          payload
+        );
+        alert("Payslip updated successfully!");
+      } else {
+        // ADD MODE
+        await axios.post(
+          "https://attendance-backend-bqhw.vercel.app/payslip",
+          payload
+        );
+        alert("Payslip added successfully!");
+      }
+
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Error:", err.response?.data || err.message);
-      alert(
-        "Failed to add payslip: " + (err.response?.data?.message || err.message)
-      );
+      alert("Failed: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -95,15 +118,16 @@ export default function PayslipForm({ onSuccess }) {
         className="w-full max-w-3xl bg-white p-8 rounded-3xl shadow-xl"
       >
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
-          Add Payslip
+          {editData ? "Edit Payslip" : "Add Payslip"}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Employee Name Dropdown */}
+          {/* Dropdown */}
           <div className="md:col-span-2">
             <label className="block mb-2 text-gray-600">
               Employee Name <span className="text-red-500">*</span>
             </label>
+
             <select
               value={
                 staffList.find((s) => s.employeeName === form.employeeName)
@@ -111,7 +135,8 @@ export default function PayslipForm({ onSuccess }) {
               }
               onChange={handleEmployeeChange}
               className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-              required
+              required={!editData}
+              disabled={!!editData}
             >
               <option value="">Select Employee</option>
               {staffList.map((staff) => (
@@ -136,8 +161,9 @@ export default function PayslipForm({ onSuccess }) {
             <div key={field.name}>
               <label className="block mb-2 text-gray-600">
                 {field.label}{" "}
-                {field.optional ? "" : <span className="text-red-500">*</span>}
+                {!field.optional && <span className="text-red-500">*</span>}
               </label>
+
               <input
                 type={field.type || "text"}
                 name={field.name}
@@ -145,21 +171,23 @@ export default function PayslipForm({ onSuccess }) {
                 onChange={handleChange}
                 required={!field.optional}
                 className={`w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${
-                  field.name === "employeeId" ||
-                  field.name === "designation" ||
-                  field.name === "salary" ||
-                  field.name === "panCard" ||
-                  field.name === "dateOfJoining"
+                  [
+                    "employeeId",
+                    "designation",
+                    "salary",
+                    "panCard",
+                    "dateOfJoining",
+                  ].includes(field.name)
                     ? "bg-gray-100 cursor-not-allowed"
                     : ""
                 }`}
-                readOnly={
-                  field.name === "employeeId" ||
-                  field.name === "designation" ||
-                  field.name === "salary" ||
-                  field.name === "panCard" ||
-                  field.name === "dateOfJoining"
-                }
+                readOnly={[
+                  "employeeId",
+                  "designation",
+                  "salary",
+                  "panCard",
+                  "dateOfJoining",
+                ].includes(field.name)}
               />
             </div>
           ))}
@@ -169,7 +197,7 @@ export default function PayslipForm({ onSuccess }) {
           type="submit"
           className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition mt-6"
         >
-          Submit Payslip
+          {editData ? "Update Payslip" : "Submit Payslip"}
         </button>
       </form>
     </div>

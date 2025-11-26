@@ -23,6 +23,7 @@ const PayrollDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPayslip, setSelectedPayslip] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [editPayslip, setEditPayslip] = useState(null);
 
   const today = new Date();
   const [selectedMonth, setSelectedMonth] = useState(months[today.getMonth()]);
@@ -45,14 +46,36 @@ const PayrollDashboard = () => {
     fetchPayslips();
   }, []);
 
-  // Filter payslips by selected month/year
+  // Edit handler
+  const handleEdit = (payslip) => {
+    setEditPayslip(payslip);
+    setShowForm(true);
+    setSelectedPayslip(null);
+  };
+
+  // Delete handler
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this payslip?"))
+      return;
+
+    try {
+      await axios.delete(
+        `https://attendance-backend-bqhw.vercel.app/payslip/${id}`
+      );
+      fetchPayslips();
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete the payslip!");
+    }
+  };
+
+  // Filter payslips by month & year
   const filteredPayslips = payslips.filter(
     (p) =>
       p.month.toLowerCase() === selectedMonth.toLowerCase() &&
       p.year === selectedYear
   );
 
-  // Get unique years from payslips for dropdown
   const years = [...new Set(payslips.map((p) => p.year))].sort((a, b) => b - a);
 
   return (
@@ -64,7 +87,10 @@ const PayrollDashboard = () => {
       {/* Add Payslip Button */}
       <div className="flex justify-between items-center mb-6">
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setShowForm(!showForm);
+            setEditPayslip(null);
+          }}
           className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700 transition"
         >
           {showForm ? "Close Form" : "Add New Payslip"}
@@ -75,9 +101,11 @@ const PayrollDashboard = () => {
       {showForm && (
         <div className="mb-6 bg-white p-6 rounded shadow-md border border-gray-200">
           <PayslipForm
+            editData={editPayslip}
             onSuccess={() => {
               fetchPayslips();
               setShowForm(false);
+              setEditPayslip(null);
             }}
           />
         </div>
@@ -117,7 +145,7 @@ const PayrollDashboard = () => {
         </div>
       </div>
 
-      {/* Loading / No Payslip */}
+      {/* Loading / No data */}
       {loading ? (
         <p className="text-gray-500">Loading payslips...</p>
       ) : filteredPayslips.length === 0 ? (
@@ -141,12 +169,8 @@ const PayrollDashboard = () => {
             <tbody>
               {filteredPayslips.map((p, index) => (
                 <tr
-                  key={`${p.employeeId}-${p.month}-${p.year}-${index}`}
-                  className={`${
-                    selectedPayslip?.employeeId === p.employeeId
-                      ? "bg-blue-50"
-                      : "hover:bg-gray-50"
-                  } transition`}
+                  key={`${p.id}-${index}`}
+                  className="hover:bg-gray-50 transition"
                 >
                   <td className="p-3 border-b">{p.employeeId}</td>
                   <td className="p-3 border-b">{p.employeeName}</td>
@@ -154,12 +178,28 @@ const PayrollDashboard = () => {
                   <td className="p-3 border-b">₹{p.salary.toLocaleString()}</td>
                   <td className="p-3 border-b capitalize">{p.month}</td>
                   <td className="p-3 border-b">{p.year}</td>
-                  <td className="p-3 border-b">
+
+                  {/* ACTION BUTTONS */}
+                  <td className="p-3 border-b flex gap-2">
+                    <button
+                      onClick={() => handleEdit(p)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                    >
+                      Delete
+                    </button>
+
                     <button
                       onClick={() => setSelectedPayslip(p)}
                       className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
                     >
-                      Generate Payslip
+                      Generate
                     </button>
                   </td>
                 </tr>
@@ -169,7 +209,7 @@ const PayrollDashboard = () => {
         </div>
       )}
 
-      {/* Selected Payslip */}
+      {/* Selected Payslip Preview */}
       {selectedPayslip && (
         <div className="mt-10 bg-white p-6 rounded shadow-md border border-gray-200">
           <div className="flex justify-between items-center mb-4">

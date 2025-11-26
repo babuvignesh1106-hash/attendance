@@ -33,4 +33,5 @@ export const ROUTES = {
   STAFF_EDIT: "/staff/edit/:id",
   STAFF_LIST: "/staff",
   STAFF_TABLE: "/staff-table",
+  NEW_EMP_PAY: "/new-emp-pay",
 };

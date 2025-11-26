@@ -26,6 +26,7 @@ import StaffForm from "../components/staff/StaffForm";
 import StaffEdit from "../components/staff/StaffEdit";
 import StaffList from "../components/staff/StaffList";
 import StaffTable from "../components/staff/StaffTable";
+import NewEmpPayroll from "../components/NewEmpPayroll";
 
 export default function AppRouter() {
   return (
@@ -81,6 +82,7 @@ export default function AppRouter() {
           <Route path={ROUTES.STAFF_EDIT} element={<StaffEdit />} />
           <Route path={ROUTES.STAFF_LIST} element={<StaffList />} />
           <Route path={ROUTES.STAFF_TABLE} element={<StaffTable />} />
+          <Route path={ROUTES.NEW_EMP_PAY} element={<NewEmpPayroll />} />
         </Route>
       </Routes>
     </BrowserRouter>

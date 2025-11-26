@@ -5,7 +5,7 @@ import logo from "../../assets/logo.png";
 
 export default function GeneratePayslip({ data }) {
   const pdfRef = useRef();
-
+  console.log(data);
   if (!data) return <p className="text-center p-10">No payslip data found.</p>;
 
   const downloadPDF = async () => {
@@ -41,13 +41,17 @@ export default function GeneratePayslip({ data }) {
       <div className="grid p-10 justify-center" ref={pdfRef}>
         <div
           className="border-2 mt-10"
-          style={{ borderColor: "#000000", height: "607px" }}
+          style={{
+            borderColor: "#000000",
+            height: "607px",
+            letterSpacing: "1px",
+          }}
         >
           {/* HEADER */}
           <div className="grid">
             <div
               className="h-32 flex items-center justify-between px-4"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               <img src={logo} alt="logo" className="w-28" />
               <div
@@ -67,8 +71,11 @@ export default function GeneratePayslip({ data }) {
           {/* MONTH */}
           <div className="grid text-center">
             <div
-              className="h-9 flex items-center justify-center"
-              style={{ border: "1px solid #000000" }}
+              className="h-9 flex justify-center"
+              style={{
+                border: "1px solid #000000",
+                paddingTop: "2px", // move text slightly upward
+              }}
             >
               Pay Slip for the Month of {data.month} - {data.year}
             </div>
@@ -77,9 +84,9 @@ export default function GeneratePayslip({ data }) {
           {/* EMPLOYEE DETAILS */}
           <div
             className="grid grid-cols-6 gap-4"
-            style={{ border: "1px solid #000000" }}
+            style={{ border: "1px solid #000000", letterSpacing: "1px" }}
           >
-            <div className="h-24 flex flex-col justify-center">
+            <div className="h-24 flex flex-col justify-center ">
               <span>Employee ID:</span>
               <span>Designation:</span>
               <span>Location:</span>
@@ -97,7 +104,7 @@ export default function GeneratePayslip({ data }) {
             <div className="h-24 flex flex-col justify-center">
               <span>{data.employeeName}</span>
               <span>{data.panCard}</span>
-              <span>{data.dateOfJoining}</span>
+              <span>{data.dateOfJoining.split("T")[0]}</span>
             </div>
             <div className="h-24 flex flex-col justify-center">
               <span>Payable Days:</span>
@@ -114,7 +121,7 @@ export default function GeneratePayslip({ data }) {
             {[
               "Earnings",
               "Current Month",
-              "Year to Date Earnings",
+              "YeartoDateEarnings",
               "Deductions",
               "Current Month",
               "YTD deductions",
@@ -133,10 +140,10 @@ export default function GeneratePayslip({ data }) {
             {/* Earnings Labels */}
             <div
               className="h-44 flex flex-col"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               <span>Basic</span>
-              <span>HouseRent Allowance</span>
+              <span>HouseRentAllowance</span>
               <span>Conveyance</span>
               <span>Medical Allowances</span>
               <span>Special allowance</span>
@@ -147,7 +154,7 @@ export default function GeneratePayslip({ data }) {
             {/* Earnings Current Month */}
             <div
               className="h-44 flex flex-col items-center"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               <span>{data.salary}</span>
               <span>-</span>
@@ -161,7 +168,7 @@ export default function GeneratePayslip({ data }) {
             {/* Earnings YTD */}
             <div
               className="h-44 flex flex-col items-center"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               <span>{data.salary * 2}</span>
               <span>-</span>
@@ -175,7 +182,7 @@ export default function GeneratePayslip({ data }) {
             {/* Deduction Labels */}
             <div
               className="h-44 flex flex-col"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               <span>PF</span>
               <span>TDS</span>
@@ -186,7 +193,7 @@ export default function GeneratePayslip({ data }) {
 
             <div
               className="h-44 flex flex-col items-center"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               <span>-</span>
               <span>-</span>
@@ -197,7 +204,7 @@ export default function GeneratePayslip({ data }) {
 
             <div
               className="h-44 flex flex-col items-center"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               <span>-</span>
               <span>-</span>
@@ -231,19 +238,19 @@ export default function GeneratePayslip({ data }) {
           <div className="grid grid-cols-6">
             <div
               className="h-10 flex items-center"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               Net Salary Pay
             </div>
             <div
               className="h-10 flex items-center justify-center"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               {data.salary + (data.bonus || 0)}
             </div>
             <div
               className="h-10 col-span-4 flex items-center justify-center"
-              style={{ border: "1px solid #000000" }}
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               {convertToWords(data.salary + (data.bonus || 0))} Rupees
             </div>
@@ -253,7 +260,11 @@ export default function GeneratePayslip({ data }) {
           <div className="grid grid-cols-6">
             <div
               className="h-10 col-span-6 flex items-center justify-center"
-              style={{ border: "1px solid #000000" }}
+              style={{
+                border: "1px solid #000000",
+                lineHeight: "34px",
+                letterSpacing: "1px",
+              }}
             >
               This is a computer generated document, hence no signature is
               required

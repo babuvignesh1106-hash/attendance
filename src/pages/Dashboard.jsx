@@ -24,6 +24,7 @@ import StaffForm from "../components/staff/StaffForm";
 import StaffTable from "../components/staff/StaffTable";
 import StaffList from "../components/staff/StaffList";
 import StaffEdit from "../components/staff/StaffEdit";
+import NewEmpPayroll from "../components/NewEmpPayroll";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -190,6 +191,11 @@ export default function Dashboard() {
               {activePage === ROUTES.STAFF_EDIT && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <StaffEdit setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.NEW_EMP_PAY && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <NewEmpPayroll setActivePage={setActivePage} />
                 </div>
               )}
             </div>

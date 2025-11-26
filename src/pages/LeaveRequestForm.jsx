@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-export default function LeaveRequestForm() {
+export default function LeaveRequestForm({ onback }) {
   const [formData, setFormData] = useState({
     name: "",
     leaveType: "",
@@ -101,6 +101,12 @@ export default function LeaveRequestForm() {
   return (
     <div className="min-h-screen flex items-start justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4 py-6 relative">
       <div className="w-full max-w-md">
+        <button
+          onClick={""}
+          className="mb-4 bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition"
+        >
+          ← Back
+        </button>
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-3xl shadow-xl p-8"
