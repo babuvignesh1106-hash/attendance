@@ -4,6 +4,7 @@ import { ROUTES } from "../../constants/routes";
 
 export default function StaffList({ setActivePage }) {
   const [staff, setStaff] = useState([]);
+  const [deleteId, setDeleteId] = useState(null); // dialog state
 
   const fetchStaff = async () => {
     try {
@@ -21,13 +22,15 @@ export default function StaffList({ setActivePage }) {
     fetchStaff();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this staff?")) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
 
     try {
-      await fetch(`https://attendance-backend-bqhw.vercel.app/staff/${id}`, {
-        method: "DELETE",
-      });
+      await fetch(
+        `https://attendance-backend-bqhw.vercel.app/staff/${deleteId}`,
+        { method: "DELETE" }
+      );
+      setDeleteId(null);
       fetchStaff();
     } catch (err) {
       console.log(err);
@@ -36,11 +39,11 @@ export default function StaffList({ setActivePage }) {
 
   const handleEdit = (staff) => {
     localStorage.setItem("editStaffId", staff.id);
-    if (setActivePage) setActivePage(ROUTES.STAFF_EDIT);
+    setActivePage(ROUTES.STAFF_EDIT);
   };
 
   const handleAdd = () => {
-    if (setActivePage) setActivePage(ROUTES.STAFF_FORM);
+    setActivePage(ROUTES.STAFF_FORM);
   };
 
   return (
@@ -59,8 +62,42 @@ export default function StaffList({ setActivePage }) {
       </div>
 
       <div className="overflow-x-auto bg-white rounded-2xl shadow-lg p-6">
-        <StaffTable data={staff} onEdit={handleEdit} onDelete={handleDelete} />
+        <StaffTable
+          data={staff}
+          onEdit={handleEdit}
+          onDelete={setDeleteId} // open dialog instead of delete directly
+        />
       </div>
+
+      {/* DELETE CONFIRMATION DIALOG */}
+      {deleteId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-[350px] text-center">
+            <h2 className="text-lg font-semibold mb-3 text-gray-800">
+              Confirm Delete
+            </h2>
+            <p className="text-gray-600 mb-5">
+              Are you sure you want to delete this staff?
+            </p>
+
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={handleDelete}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg"
+              >
+                Yes, Delete
+              </button>
+
+              <button
+                onClick={() => setDeleteId(null)}
+                className="bg-gray-300 px-4 py-2 rounded-lg"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { ROUTES } from "../../constants/routes";
 
-export default function Approved() {
+export default function Approved({ setActivePage }) {
   const username = localStorage.getItem("name");
   const [leaves, setLeaves] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
@@ -29,6 +30,15 @@ export default function Approved() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
+      <div className="w-full max-w-md mb-6">
+        <button
+          type="button"
+          onClick={() => setActivePage(ROUTES.LEAVEDASHBOARD)}
+          className="bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-gray-600 transition"
+        >
+          Back
+        </button>
+      </div>
       <h2 className="text-3xl font-bold text-center text-purple-700 mb-6">
         Leave Requests - {username}
       </h2>

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { ROUTES } from "../../constants/routes";
 
-export default function PermissionRecords({ onBack }) {
+export default function PermissionRecords({ setActivePage }) {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const username = localStorage.getItem("name"); // ✅ Employee name from localStorage
+  const username = localStorage.getItem("name"); // Employee name from localStorage
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -15,7 +16,7 @@ export default function PermissionRecords({ onBack }) {
           "https://attendance-backend-bqhw.vercel.app/permission"
         );
 
-        // ✅ Filter only the logged-in user's records
+        // Filter only the logged-in user's records
         const filtered = res.data.filter(
           (record) => record.name?.toLowerCase() === username?.toLowerCase()
         );
@@ -38,28 +39,26 @@ export default function PermissionRecords({ onBack }) {
       </div>
     );
 
-  if (error)
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <p className="text-red-600 font-semibold mb-4">{error}</p>
+  return (
+    <div className="min-h-screen bg-gray-100 p-8 flex flex-col items-center">
+      {/* Back Button */}
+      <div className="w-full max-w-5xl mb-6">
         <button
-          onClick={onBack}
+          type="button"
+          onClick={() => setActivePage(ROUTES.PERMISSIONDASHBOARD)}
           className="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition"
         >
           Back
         </button>
       </div>
-    );
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-8">
+      {error && <div className="text-red-600 font-semibold mb-4">{error}</div>}
+
       <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">
         Permission Records
       </h2>
 
-      <div className="flex justify-center mb-6"></div>
-
-      <div className="overflow-x-auto bg-white rounded-2xl shadow-lg p-6">
+      <div className="overflow-x-auto bg-white rounded-2xl shadow-lg p-6 w-full max-w-5xl">
         <table className="w-full border border-gray-200">
           <thead>
             <tr className="bg-blue-600 text-white">

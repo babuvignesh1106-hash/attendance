@@ -84,19 +84,6 @@ const PayrollDashboard = () => {
         Payroll Dashboard
       </h1>
 
-      {/* Add Payslip Button */}
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            setEditPayslip(null);
-          }}
-          className="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700 transition"
-        >
-          {showForm ? "Close Form" : "Add New Payslip"}
-        </button>
-      </div>
-
       {/* Payslip Form */}
       {showForm && (
         <div className="mb-6 bg-white p-6 rounded shadow-md border border-gray-200">

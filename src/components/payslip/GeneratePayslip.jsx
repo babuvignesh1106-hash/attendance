@@ -9,19 +9,33 @@ export default function GeneratePayslip({ data }) {
   if (!data) return <p className="text-center p-10">No payslip data found.</p>;
 
   const downloadPDF = async () => {
-    const canvas = await html2canvas(pdfRef.current, {
-      scale: 2,
+    const element = pdfRef.current;
+
+    const canvas = await html2canvas(element, {
+      scale: 8,
       useCORS: true,
     });
+
     const imgData = canvas.toDataURL("image/png");
 
-    const pdf = new jsPDF("l", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    // 👉 IMPORTANT: set orientation to landscape
+    const pdf = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "a4",
+    });
 
-    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-    pdf.save(`Payslip_${data.employeeId}_${data.month}_${data.year}.pdf`);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+
+    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+
+    pdf.addImage(imgData, "PNG", 0, 0, imgWidth * ratio, imgHeight * ratio);
+
+    pdf.save("payslip.pdf");
   };
 
   return (
@@ -43,7 +57,7 @@ export default function GeneratePayslip({ data }) {
           className="border-2 mt-10"
           style={{
             borderColor: "#000000",
-            height: "607px",
+            height: "767px",
             letterSpacing: "1px",
           }}
         >
@@ -253,6 +267,57 @@ export default function GeneratePayslip({ data }) {
               style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               {convertToWords(data.salary + (data.bonus || 0))} Rupees
+            </div>
+          </div>
+          <div className="grid grid-cols-6 text-center">
+            <div
+              className="h-10 flex items-center col-span-5 text-center"
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+            >
+              Reimbursements
+            </div>
+
+            <div
+              className="h-10 col-span-1 flex items-center justify-center"
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+            >
+              Amount
+            </div>
+          </div>
+          <div className="grid grid-cols-6 text-center">
+            <div
+              className="h-10 col-span-6 flex items-center text-center"
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+            >
+              Total Reimbursements
+            </div>
+          </div>
+          <div className="grid grid-cols-6 text-center">
+            <div
+              className="h-10 col-span-2 flex items-center text-center"
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+            >
+              Net Transfer
+            </div>
+            <div
+              className="h-10 col-span-4 flex items-center text-center"
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+            >
+              Total
+            </div>
+          </div>
+          <div className="grid grid-cols-6 text-center">
+            <div
+              className="h-10 col-span-2 flex items-center text-center"
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+            >
+              In Wordss
+            </div>
+            <div
+              className="h-10 col-span-4 flex items-center text-center"
+              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+            >
+              Total
             </div>
           </div>
 

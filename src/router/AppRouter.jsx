@@ -12,8 +12,8 @@ import Signup from "../pages/Signup";
 import ProtectedRoute from "../router/ProtectedRoute"; // ✅ Add this for route protection
 import CheckOutDialog from "../components/CheckOutDialog";
 import LeaveRequestForm from "../pages/LeaveRequestForm";
-import PermissionRequestForm from "../components/PermissionRequestForm";
-import BalanceCheck from "../components/BalanceCheck";
+import PermissionRequestForm from "../components/permission/PermissionRequestForm";
+import BalanceCheck from "../components/leave/BalanceCheck";
 import LeaveDashboard from "../components/leave/LeaveDashboard";
 import Approved from "../components/leave/Approved";
 import PermissionDashboard from "../components/permission/PermissionDashboard";
@@ -27,6 +27,8 @@ import StaffEdit from "../components/staff/StaffEdit";
 import StaffList from "../components/staff/StaffList";
 import StaffTable from "../components/staff/StaffTable";
 import NewEmpPayroll from "../components/NewEmpPayroll";
+import PayRoll from "../components/payslip/PayRoll";
+import StaffDasboard from "../components/staff/StaffDasboard";
 
 export default function AppRouter() {
   return (
@@ -78,10 +80,14 @@ export default function AppRouter() {
           />
           <Route path={ROUTES.PAYROLL_GENERATE} element={<GeneratePayslip />} />
           <Route path={ROUTES.PAYSLIPFORM} element={<PayslipForm />} />
+          <Route path={ROUTES.PAYROLL} element={<PayRoll />} />
+
           <Route path={ROUTES.STAFF_FORM} element={<StaffForm />} />
           <Route path={ROUTES.STAFF_EDIT} element={<StaffEdit />} />
           <Route path={ROUTES.STAFF_LIST} element={<StaffList />} />
           <Route path={ROUTES.STAFF_TABLE} element={<StaffTable />} />
+          <Route path={ROUTES.STAFF_DASHBOARD} element={<StaffDasboard />} />
+
           <Route path={ROUTES.NEW_EMP_PAY} element={<NewEmpPayroll />} />
         </Route>
       </Routes>

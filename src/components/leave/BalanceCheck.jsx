@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { ROUTES } from "../../constants/routes";
 
-export default function BalanceCheck() {
+export default function BalanceCheck({ setActivePage }) {
   const username = localStorage.getItem("name"); // get name from localStorage
   const [balanceData, setBalanceData] = useState(null);
 
@@ -14,7 +15,7 @@ export default function BalanceCheck() {
         setBalanceData(res.data);
       } catch (err) {
         console.error(err);
-        setBalanceData(null); // just keep it null if error
+        setBalanceData(null);
       }
     };
 
@@ -29,7 +30,19 @@ export default function BalanceCheck() {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex flex-col items-center bg-gray-100 p-4 pt-8">
+      {/* Back Button at the Top */}
+      <div className="w-full max-w-md mb-6">
+        <button
+          type="button"
+          onClick={() => setActivePage(ROUTES.LEAVEDASHBOARD)}
+          className="bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-gray-600 transition"
+        >
+          Back
+        </button>
+      </div>
+
+      {/* Balance Card */}
       <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md text-center">
         <h2 className="text-2xl font-bold mb-6 text-gray-700">
           Leave Balance - {username}

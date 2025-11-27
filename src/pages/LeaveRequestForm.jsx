@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../constants/routes";
 
-export default function LeaveRequestForm({ onback }) {
+export default function LeaveRequestForm({ setActivePage }) {
   const [formData, setFormData] = useState({
     name: "",
     leaveType: "",
@@ -14,6 +16,7 @@ export default function LeaveRequestForm({ onback }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [balanceData, setBalanceData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedName = localStorage.getItem("name");
@@ -101,12 +104,16 @@ export default function LeaveRequestForm({ onback }) {
   return (
     <div className="min-h-screen flex items-start justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4 py-6 relative">
       <div className="w-full max-w-md">
-        <button
-          onClick={""}
-          className="mb-4 bg-gray-700 text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition"
-        >
-          ← Back
-        </button>
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => setActivePage(ROUTES.LEAVEDASHBOARD)}
+            className="bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-gray-600 transition"
+          >
+            Back
+          </button>
+        </div>
+
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-3xl shadow-xl p-8"

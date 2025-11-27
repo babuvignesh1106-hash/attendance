@@ -10,8 +10,8 @@ import { ROUTES } from "../constants/routes";
 import CalendarGrid from "../components/calendar/CalendarGrid";
 
 import LeaveRequestForm from "./LeaveRequestForm";
-import PermissionRequestForm from "../components/PermissionRequestForm";
-import BalanceCheck from "../components/BalanceCheck";
+import PermissionRequestForm from "../components/permission/PermissionRequestForm";
+import BalanceCheck from "../components/leave/BalanceCheck";
 import LeaveDashboard from "../components/leave/LeaveDashboard";
 import Approved from "../components/leave/Approved";
 import PermissionDashboard from "../components/permission/PermissionDashboard";
@@ -25,6 +25,8 @@ import StaffTable from "../components/staff/StaffTable";
 import StaffList from "../components/staff/StaffList";
 import StaffEdit from "../components/staff/StaffEdit";
 import NewEmpPayroll from "../components/NewEmpPayroll";
+import PayRoll from "../components/payslip/PayRoll";
+import StaffDasboard from "../components/staff/StaffDasboard";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -99,13 +101,13 @@ export default function Dashboard() {
 
               {activePage === ROUTES.CALENDARGRID && (
                 <div className="col-span-1 lg:col-span-8 bg-white p-4 sm:p-6 rounded-xl shadow-md">
-                  <CalendarGrid />
+                  <CalendarGrid setActivePage={setActivePage} />
                 </div>
               )}
 
               {activePage === ROUTES.ADMIN && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
-                  <Admin />
+                  <Admin setActivePage={setActivePage} />
                 </div>
               )}
 
@@ -117,25 +119,25 @@ export default function Dashboard() {
 
               {activePage === ROUTES.PERMISSIONREQUESTFORM && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
-                  <PermissionRequestForm />
+                  <PermissionRequestForm setActivePage={setActivePage} />
                 </div>
               )}
 
               {activePage === ROUTES.BALANCECHECK && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
-                  <BalanceCheck />
+                  <BalanceCheck setActivePage={setActivePage} />
                 </div>
               )}
 
               {activePage === ROUTES.LEAVEREQUESTFORM && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
-                  <LeaveRequestForm />
+                  <LeaveRequestForm setActivePage={setActivePage} />
                 </div>
               )}
 
               {activePage === ROUTES.APPROVED && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
-                  <Approved />
+                  <Approved setActivePage={setActivePage} />
                 </div>
               )}
 
@@ -165,6 +167,11 @@ export default function Dashboard() {
                   <PayslipForm setActivePage={setActivePage} />
                 </div>
               )}
+              {activePage === ROUTES.PAYROLL && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <PayRoll setActivePage={setActivePage} />
+                </div>
+              )}
               {activePage === ROUTES.PAYROLL_GENERATE && selectedPayslip && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <GeneratePayslip
@@ -191,6 +198,11 @@ export default function Dashboard() {
               {activePage === ROUTES.STAFF_EDIT && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <StaffEdit setActivePage={setActivePage} />
+                </div>
+              )}
+              {activePage === ROUTES.STAFF_DASHBOARD && (
+                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
+                  <StaffDasboard setActivePage={setActivePage} />
                 </div>
               )}
               {activePage === ROUTES.NEW_EMP_PAY && (

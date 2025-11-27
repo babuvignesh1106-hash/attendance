@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { ROUTES } from "../../constants/routes";
 
 function getTodayDate() {
   const d = new Date();
@@ -9,7 +10,7 @@ function getTodayDate() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export default function PermissionRequestForm() {
+export default function PermissionRequestForm({ setActivePage }) {
   const [formData, setFormData] = useState({
     name: "",
     date: getTodayDate(),
@@ -67,7 +68,19 @@ export default function PermissionRequestForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4">
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-r from-blue-100 to-blue-300 px-4 pt-8">
+      {/* Back Button */}
+      <div className="w-full max-w-md mb-6">
+        <button
+          type="button"
+          onClick={() => setActivePage(ROUTES.PERMISSIONDASHBOARD)}
+          className="bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-gray-600 transition"
+        >
+          Back
+        </button>
+      </div>
+
+      {/* Form */}
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8"

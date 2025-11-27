@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { ROUTES } from "../../constants/routes";
 
 export default function StaffEdit({ setActivePage }) {
   const staffId = localStorage.getItem("editStaffId");
+
   const [form, setForm] = useState({
     employeeId: "",
     employeeName: "",
@@ -11,6 +13,8 @@ export default function StaffEdit({ setActivePage }) {
     dateOfJoining: "",
     location: "",
   });
+
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (!staffId) return;
@@ -33,15 +37,20 @@ export default function StaffEdit({ setActivePage }) {
           body: JSON.stringify(form),
         }
       );
-      alert("Staff updated successfully!");
-      if (setActivePage) setActivePage("STAFF_LIST");
+
+      setShowSuccess(true);
     } catch (err) {
       console.log(err);
     }
   };
 
+  const closeDialog = () => {
+    setShowSuccess(false);
+    setActivePage("/staff");
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 relative">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-2xl bg-white p-8 rounded-3xl shadow-xl"
@@ -80,7 +89,7 @@ export default function StaffEdit({ setActivePage }) {
         <div className="mt-6 flex flex-col sm:flex-row justify-between gap-3">
           <button
             type="button"
-            onClick={() => setActivePage("STAFF_LIST")}
+            onClick={() => setActivePage(ROUTES.STAFF_LIST)}
             className="bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-gray-600 transition"
           >
             Back
@@ -93,6 +102,28 @@ export default function StaffEdit({ setActivePage }) {
           </button>
         </div>
       </form>
+
+      {/* INLINE SUCCESS DIALOG */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-[320px] text-center">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">
+              Staff Updated!
+            </h2>
+
+            <p className="text-gray-600 mb-6">
+              Staff details updated successfully.
+            </p>
+
+            <button
+              onClick={closeDialog}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md w-full"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

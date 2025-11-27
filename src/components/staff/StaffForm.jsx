@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
-import { ROUTES } from "../../constants/routes"; // import your ROUTES
+import { ROUTES } from "../../constants/routes";
 
 export default function StaffForm({ setActivePage }) {
   const [form, setForm] = useState({
@@ -13,32 +13,28 @@ export default function StaffForm({ setActivePage }) {
     location: "",
   });
 
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(
-        "https://attendance-backend-bqhw.vercel.app/staff",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }
-      );
+      await fetch("https://attendance-backend-bqhw.vercel.app/staff", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-      if (!res.ok) throw new Error("Failed to save staff.");
-
-      alert("Staff added successfully!");
-      if (setActivePage) setActivePage(ROUTES.STAFF_LIST);
+      setShowSuccess(true);
     } catch (err) {
-      alert(err.message);
+      console.log(err);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-blue-300 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-blue-100 px-4">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-3xl bg-white rounded-3xl shadow-xl p-8"
@@ -47,7 +43,6 @@ export default function StaffForm({ setActivePage }) {
           Add Staff
         </h2>
 
-        {/* Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { label: "Employee ID", name: "employeeId", type: "text" },
@@ -69,18 +64,17 @@ export default function StaffForm({ setActivePage }) {
                 value={form[field.name]}
                 onChange={handleChange}
                 required
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full p-3 border rounded-xl"
               />
             </div>
           ))}
         </div>
 
-        {/* Buttons */}
-        <div className="mt-6 flex flex-col md:flex-row justify-between gap-3">
+        <div className="mt-6 flex justify-between">
           <button
             type="button"
-            onClick={() => setActivePage(ROUTES.STAFF_LIST)}
-            className="flex items-center gap-2 text-blue-600 font-medium"
+            onClick={() => setActivePage(ROUTES.STAFF_DASHBOARD)}
+            className="flex items-center gap-2 text-blue-600"
           >
             <IoArrowBack size={20} />
             Back
@@ -88,12 +82,30 @@ export default function StaffForm({ setActivePage }) {
 
           <button
             type="submit"
-            className="w-full md:w-auto bg-blue-600 text-white py-3 px-6 rounded-xl hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white py-3 px-6 rounded-xl"
           >
             Save Staff
           </button>
         </div>
       </form>
+
+      {/* SUCCESS DIALOG */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-[330px] text-center">
+            <h2 className="text-lg font-semibold mb-4">Staff Added!</h2>
+
+            <button
+              onClick={() => (
+                setShowSuccess(false), setActivePage(ROUTES.STAFF_LIST)
+              )}
+              className="bg-blue-600 text-white w-full py-2 rounded-lg"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

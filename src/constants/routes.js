@@ -29,9 +29,11 @@ export const ROUTES = {
   PAYROLL_DASHBOARD: "/payroll-dashboard",
   PAYROLL_GENERATE: "/payroll-generate",
   PAYSLIPFORM: "/payslip-form",
+  PAYROLL: "/pay-roll",
   STAFF_FORM: "/staff-form",
   STAFF_EDIT: "/staff/edit/:id",
   STAFF_LIST: "/staff",
   STAFF_TABLE: "/staff-table",
+  STAFF_DASHBOARD: "/staff-dashboard",
   NEW_EMP_PAY: "/new-emp-pay",
 };
