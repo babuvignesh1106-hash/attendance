@@ -12,13 +12,12 @@ export default function GeneratePayslip({ data }) {
     const element = pdfRef.current;
 
     const canvas = await html2canvas(element, {
-      scale: 8,
+      scale: 3,
       useCORS: true,
     });
 
     const imgData = canvas.toDataURL("image/png");
 
-    // 👉 IMPORTANT: set orientation to landscape
     const pdf = new jsPDF({
       orientation: "landscape",
       unit: "pt",
@@ -31,9 +30,16 @@ export default function GeneratePayslip({ data }) {
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
 
+    // scale image to fit inside PDF
     const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+    const finalWidth = imgWidth * ratio;
+    const finalHeight = imgHeight * ratio;
 
-    pdf.addImage(imgData, "PNG", 0, 0, imgWidth * ratio, imgHeight * ratio);
+    // 👉 CENTERING:
+    const x = (pdfWidth - finalWidth) / 2; // center horizontally
+    const y = (pdfHeight - finalHeight) / 2; // center vertically
+
+    pdf.addImage(imgData, "PNG", x, y, finalWidth, finalHeight);
 
     pdf.save("payslip.pdf");
   };
@@ -75,7 +81,7 @@ export default function GeneratePayslip({ data }) {
                 <h1 className="text-[30px] leading-tight">
                   Ascentware Private Limited,
                 </h1>
-                <p className="text-[18px]">
+                <p className="text-[14px]">
                   No.184, Periyar Pathai, Choolaimedu, Chennai - 600094.
                 </p>
               </div>
@@ -98,14 +104,18 @@ export default function GeneratePayslip({ data }) {
           {/* EMPLOYEE DETAILS */}
           <div
             className="grid grid-cols-6 gap-4"
-            style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+            style={{
+              border: "1px solid #000000",
+              letterSpacing: "1px",
+              paddingLeft: "2px",
+            }}
           >
-            <div className="h-24 flex flex-col justify-center ">
+            <div className="h-24 flex flex-col justify-center pb-3 ">
               <span>Employee ID:</span>
               <span>Designation:</span>
               <span>Location:</span>
             </div>
-            <div className="h-24 flex flex-col justify-center">
+            <div className="h-24 flex flex-col justify-center pb-3">
               <span>{data.employeeId}</span>
               <span>{data.designation}</span>
               <span>Chennai</span>
@@ -154,10 +164,14 @@ export default function GeneratePayslip({ data }) {
             {/* Earnings Labels */}
             <div
               className="h-44 flex flex-col"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               <span>Basic</span>
-              <span>HouseRentAllowance</span>
+              <span>House Rent</span>
               <span>Conveyance</span>
               <span>Medical Allowances</span>
               <span>Special allowance</span>
@@ -252,7 +266,11 @@ export default function GeneratePayslip({ data }) {
           <div className="grid grid-cols-6">
             <div
               className="h-10 flex items-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               Net Salary Pay
             </div>
@@ -264,7 +282,11 @@ export default function GeneratePayslip({ data }) {
             </div>
             <div
               className="h-10 col-span-4 flex items-center justify-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               {convertToWords(data.salary + (data.bonus || 0))} Rupees
             </div>
@@ -272,14 +294,22 @@ export default function GeneratePayslip({ data }) {
           <div className="grid grid-cols-6 text-center">
             <div
               className="h-10 flex items-center col-span-5 text-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               Reimbursements
             </div>
 
             <div
               className="h-10 col-span-1 flex items-center justify-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               Amount
             </div>
@@ -287,7 +317,11 @@ export default function GeneratePayslip({ data }) {
           <div className="grid grid-cols-6 text-center">
             <div
               className="h-10 col-span-6 flex items-center text-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               Total Reimbursements
             </div>
@@ -295,13 +329,21 @@ export default function GeneratePayslip({ data }) {
           <div className="grid grid-cols-6 text-center">
             <div
               className="h-10 col-span-2 flex items-center text-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               Net Transfer
             </div>
             <div
               className="h-10 col-span-4 flex items-center text-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               Total
             </div>
@@ -309,13 +351,21 @@ export default function GeneratePayslip({ data }) {
           <div className="grid grid-cols-6 text-center">
             <div
               className="h-10 col-span-2 flex items-center text-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               In Wordss
             </div>
             <div
               className="h-10 col-span-4 flex items-center text-center"
-              style={{ border: "1px solid #000000", letterSpacing: "1px" }}
+              style={{
+                border: "1px solid #000000",
+                letterSpacing: "1px",
+                paddingLeft: "2px",
+              }}
             >
               Total
             </div>

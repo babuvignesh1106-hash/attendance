@@ -39,66 +39,56 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* ✅ Navbar */}
+      {/* Navbar */}
       <header className="w-full fixed top-0 left-0 z-50 shadow-md bg-white">
         <Navbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       </header>
 
-      <div className="flex pt-[70px]">
-        {/* ✅ Sidebar */}
-        <div
-          className={`fixed top-[70px] left-0 h-[calc(100vh-70px)]  transition-all duration-300 overflow-hidden z-40
-            ${isSidebarOpen ? "w-64" : "w-0 md:w-64"}
-          `}
-        >
-          <EmpSidebar
-            isOpen={isSidebarOpen}
-            onNavigate={setActivePage}
-            activePage={activePage}
-          />
-        </div>
+      <div className="flex pt-[70px] relative">
+        {/* Sidebar Overlay */}
+        <EmpSidebar
+          isOpen={isSidebarOpen}
+          onNavigate={setActivePage}
+          activePage={activePage}
+        />
 
-        {/* ✅ Main Content */}
+        {/* Optional overlay to close sidebar on click */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/30 z-40"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Main Content */}
         <div
-          className={`flex-1 transition-all duration-300 ${
-            isSidebarOpen ? "ml-0 md:ml-64" : "ml-0"
+          className={`transition-all duration-300 ${
+            isSidebarOpen ? "ml-64 w-[calc(100%-16rem)]" : "ml-0 w-full"
           }`}
         >
-          <main className="relative p-3 sm:p-6 md:p-8 overflow-y-auto origin-top scale-100 md:scale-[0.95] lg:scale-[0.9] xl:scale-[0.9]">
-            <div
-              className="
-                grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4 sm:gap-6
-              "
-            >
+          <main className="relative p-3 sm:p-6 md:p-8 overflow-y-auto origin-top scale-100 md:scale-[0.95] lg:scale-[0.95] xl:scale-[0.95]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-4 sm:gap-6">
               {activePage === ROUTES.DASHBOARD && (
                 <>
-                  {/* ✅ Employee Details */}
                   <div className="col-span-1 sm:col-span-2 bg-white p-4 rounded-xl shadow-md flex flex-col">
                     <EmployeeDetails />
                   </div>
-
-                  {/* ✅ Break Time */}
                   <div className="col-span-1 sm:col-span-2 bg-white p-4 rounded-xl shadow-md flex flex-col">
                     <BreakTime />
                   </div>
-
-                  {/* ✅ Today Summary */}
                   <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col">
                     <TodaySummary />
                   </div>
-
-                  {/* ✅ Weekly Chart */}
-                  <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col ">
+                  <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col">
                     <WeeklyStatusChart />
                   </div>
-
-                  {/* ✅ Calendar */}
                   <div className="col-span-1 sm:col-span-2 lg:col-span-4 bg-white p-6 rounded-xl shadow-md flex flex-col pointer-events-none">
                     <CalendarGrid />
                   </div>
                 </>
               )}
 
+              {/* Other Pages */}
               {activePage === ROUTES.CALENDARGRID && (
                 <div className="col-span-1 lg:col-span-8 bg-white p-4 sm:p-6 rounded-xl shadow-md">
                   <CalendarGrid setActivePage={setActivePage} />
@@ -107,7 +97,7 @@ export default function Dashboard() {
 
               {activePage === ROUTES.ADMIN && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
-                  <Admin setActivePage={setActivePage} />
+                  <AdminDashboard setActivePage={setActivePage} />
                 </div>
               )}
 
@@ -152,59 +142,61 @@ export default function Dashboard() {
                   <PermissionRecords setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.ADMINDASHBOARD && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <AdminDashboard setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.PAYROLL_DASHBOARD && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <PayrollDashboard setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.PAYSLIPFORM && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <PayslipForm setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.PAYROLL && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <PayRoll setActivePage={setActivePage} />
                 </div>
               )}
-              {activePage === ROUTES.PAYROLL_GENERATE && selectedPayslip && (
-                <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
-                  <GeneratePayslip
-                    payslipData={selectedPayslip} // ✅ pass data directly
-                    setActivePage={setActivePage}
-                  />
-                </div>
-              )}
+
               {activePage === ROUTES.STAFF_FORM && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <StaffForm setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.STAFF_TABLE && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <StaffTable setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.STAFF_LIST && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <StaffList setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.STAFF_EDIT && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <StaffEdit setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.STAFF_DASHBOARD && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <StaffDasboard setActivePage={setActivePage} />
                 </div>
               )}
+
               {activePage === ROUTES.NEW_EMP_PAY && (
                 <div className="col-span-1 lg:col-span-8 p-4 sm:p-6 rounded-xl">
                   <NewEmpPayroll setActivePage={setActivePage} />

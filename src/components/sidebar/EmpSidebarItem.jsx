@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function EmpSidebarItem({ icon, label, onClick, active }) {
   return (
     <div

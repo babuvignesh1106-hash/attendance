@@ -4,7 +4,7 @@ import Logo from "../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import CheckOutDialog from "./CheckOutDialog";
-import LogoutDialog from "./LogoutDialog"; // 👈 Import the new component
+import LogoutDialog from "./LogoutDialog";
 
 function formatTime(ms) {
   const totalSec = Math.floor(ms / 1000);
@@ -24,7 +24,6 @@ export default function Navbar({ onToggleSidebar }) {
 
   const workedTimeFormatted = formatTime(elapsedTime);
 
-  // ✅ Logout logic
   const handleLogoutClick = () => setShowLogoutDialog(true);
   const confirmLogout = () => {
     if (isCheckedIn) checkOut();
@@ -34,7 +33,6 @@ export default function Navbar({ onToggleSidebar }) {
   };
   const cancelLogout = () => setShowLogoutDialog(false);
 
-  // ✅ Check-Out logic
   const handleCheckOutClick = () => setShowCheckOutDialog(true);
   const confirmCheckOut = () => {
     checkOut();
@@ -44,14 +42,12 @@ export default function Navbar({ onToggleSidebar }) {
 
   return (
     <>
-      {/* Navbar */}
       <nav className="bg-[#0b2c5d] shadow-md fixed w-full top-0 z-50">
         <div className="flex items-center justify-between px-4 py-3">
-          {/* Left Section */}
           <div className="flex items-center gap-3">
             <button
               onClick={onToggleSidebar}
-              className="text-white text-xl hover:text-gray-300 focus:outline-none"
+              className="text-white text-xl hover:text-gray-300 "
             >
               <FaBars />
             </button>
@@ -62,10 +58,9 @@ export default function Navbar({ onToggleSidebar }) {
             </span>
           </div>
 
-          {/* Right Section */}
           <div className="flex items-center gap-3">
             <div className="bg-white text-black font-mono px-3 py-1 rounded-md shadow-md min-w-[120px] text-center">
-              {formatTime(elapsedTime)} {isOnBreak && "(On Break)"}
+              {workedTimeFormatted} {isOnBreak && "(On Break)"}
             </div>
 
             {!isCheckedIn ? (
@@ -94,7 +89,6 @@ export default function Navbar({ onToggleSidebar }) {
         </div>
       </nav>
 
-      {/* Dialogs */}
       {showCheckOutDialog && (
         <CheckOutDialog
           workedTime={workedTimeFormatted}
