@@ -7,17 +7,18 @@ const API_BASE = "https://attendance-backend-bqhw.vercel.app/attendance";
 export const useAttendanceStore = create(
   persist(
     (set, get) => ({
+      // STATE
       isCheckedIn: false,
-      startTime: null,
-      elapsedTime: 0,
-      timerInterval: null,
+      startTime: null, // number (timestamp) or null
+      elapsedTime: 0, // milliseconds
+      timerInterval: null, // will store setInterval ID
       isOnBreak: false,
       breakCount: 0,
-      breakStart: null,
+      breakStart: null, // number (timestamp) or null
       breakElapsed: 0,
       date: new Date().toDateString(),
 
-      // ✅ CHECK-IN
+      // CHECK-IN
       checkIn: async () => {
         if (get().isCheckedIn) return;
 
@@ -45,18 +46,19 @@ export const useAttendanceStore = create(
         }
       },
 
-      // ✅ TOGGLE BREAK
+      // TOGGLE BREAK
       toggleBreak: async () => {
         if (!get().isCheckedIn) return;
 
         const username = localStorage.getItem("name") || "unknown";
 
         try {
-          if (get().isOnBreak) {
+          if (get().isOnBreak && get().breakStart !== null) {
             // End break
             await axios.post(`${API_BASE}/end-break`, { username });
+
             const now = Date.now();
-            const breakDuration = now - get().breakStart!;
+            const breakDuration = now - get().breakStart;
             set({
               isOnBreak: false,
               breakElapsed: get().breakElapsed + breakDuration,
@@ -76,7 +78,7 @@ export const useAttendanceStore = create(
         }
       },
 
-      // ✅ CHECK-OUT
+      // CHECK-OUT
       checkOut: async () => {
         if (!get().isCheckedIn) return;
 
@@ -103,29 +105,34 @@ export const useAttendanceStore = create(
         });
       },
 
-      // ✅ TIMER TICK
+      // TIMER TICK
       resumeTimerTick: () => {
         const now = Date.now();
-        let workedTime = now - get().startTime! - get().breakElapsed;
+        const startTime = get().startTime;
+        if (!startTime) return;
 
-        if (get().isOnBreak && get().breakStart) {
+        let workedTime = now - startTime - get().breakElapsed;
+
+        if (get().isOnBreak && get().breakStart !== null) {
           workedTime -= now - get().breakStart;
         }
 
         set({ elapsedTime: workedTime });
 
-        // Auto checkout if date changed
         const currentDate = new Date().toDateString();
         if (get().date !== currentDate) get().checkOut();
 
-        // Optional: Auto checkout at 12:00 AM
         const d = new Date();
-        if (d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0) {
+        if (
+          d.getHours() === 0 &&
+          d.getMinutes() === 0 &&
+          d.getSeconds() === 0
+        ) {
           get().checkOut();
         }
       },
 
-      // ✅ RESUME TIMER
+      // RESUME TIMER
       resumeTimer: () => {
         if (!get().isCheckedIn) return;
         if (get().timerInterval) clearInterval(get().timerInterval);
@@ -133,7 +140,7 @@ export const useAttendanceStore = create(
         set({ timerInterval: interval });
       },
 
-      // ✅ RESET
+      // RESET
       reset: () => {
         if (get().timerInterval) clearInterval(get().timerInterval);
         set({
