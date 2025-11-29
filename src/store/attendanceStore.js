@@ -2,10 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios";
 
+const API_BASE = "https://attendance-backend-bqhw.vercel.app/attendance";
+
 export const useAttendanceStore = create(
   persist(
     (set, get) => ({
-      // ✅ STATE
       isCheckedIn: false,
       startTime: null,
       elapsedTime: 0,
@@ -17,78 +18,76 @@ export const useAttendanceStore = create(
       date: new Date().toDateString(),
 
       // ✅ CHECK-IN
-      checkIn: () => {
+      checkIn: async () => {
         if (get().isCheckedIn) return;
 
-        const now = Date.now();
-        const interval = setInterval(() => {
-          const nowTime = Date.now();
-          let workedTime = nowTime - get().startTime - get().breakElapsed;
+        const username = localStorage.getItem("name") || "unknown";
 
-          if (get().isOnBreak && get().breakStart) {
-            const breakTime = nowTime - get().breakStart;
-            workedTime -= breakTime;
+        try {
+          await axios.post(`${API_BASE}/check-in`, { username });
+
+          const now = Date.now();
+          const interval = setInterval(() => get().resumeTimerTick(), 1000);
+
+          set({
+            isCheckedIn: true,
+            startTime: now,
+            timerInterval: interval,
+            breakElapsed: 0,
+            breakCount: 0,
+            isOnBreak: false,
+            breakStart: null,
+            elapsedTime: 0,
+            date: new Date().toDateString(),
+          });
+        } catch (err) {
+          console.error("Check-in failed:", err);
+        }
+      },
+
+      // ✅ TOGGLE BREAK
+      toggleBreak: async () => {
+        if (!get().isCheckedIn) return;
+
+        const username = localStorage.getItem("name") || "unknown";
+
+        try {
+          if (get().isOnBreak) {
+            // End break
+            await axios.post(`${API_BASE}/end-break`, { username });
+            const now = Date.now();
+            const breakDuration = now - get().breakStart!;
+            set({
+              isOnBreak: false,
+              breakElapsed: get().breakElapsed + breakDuration,
+              breakStart: null,
+            });
+          } else {
+            // Start break
+            await axios.post(`${API_BASE}/start-break`, { username });
+            set({
+              isOnBreak: true,
+              breakCount: get().breakCount + 1,
+              breakStart: Date.now(),
+            });
           }
-
-          set({ elapsedTime: workedTime });
-
-          // 🔹 Check if date changed (crossed midnight)
-          const currentDate = new Date().toDateString();
-          if (get().date !== currentDate) {
-            get().autoCheckOutOnDateChange();
-          }
-
-          // 🔹 Check if time is 12:00 AM
-          get().checkAutoCheckoutTime();
-        }, 1000);
-
-        set({
-          isCheckedIn: true,
-          startTime: now,
-          timerInterval: interval,
-          breakElapsed: 0,
-          breakCount: 0,
-          isOnBreak: false,
-          breakStart: null,
-          elapsedTime: 0,
-          date: new Date().toDateString(),
-        });
+        } catch (err) {
+          console.error("Break toggle failed:", err);
+        }
       },
 
       // ✅ CHECK-OUT
       checkOut: async () => {
-        const {
-          startTime,
-          elapsedTime,
-          breakCount,
-          breakElapsed,
-          isCheckedIn,
-          timerInterval,
-        } = get();
+        if (!get().isCheckedIn) return;
 
-        if (!isCheckedIn) return;
+        const username = localStorage.getItem("name") || "unknown";
 
-        if (timerInterval) clearInterval(timerInterval);
+        if (get().timerInterval) clearInterval(get().timerInterval);
 
         try {
-          const username = localStorage.getItem("name") || "unknown";
-
-          const data = {
-            startTime: new Date(startTime).toISOString(),
-            endTime: new Date().toISOString(),
-            workedDuration: Math.floor(elapsedTime / 1000), // in seconds
-            breakCount,
-            totalBreakDuration: Math.floor(breakElapsed / 1000),
-            username,
-          };
-
-          await axios.post(
-            "https://attendance-backend-bqhw.vercel.app/attendance",
-            data
-          );
-          console.log("✅ Auto checkout submitted successfully!");
-        } catch (error) {
-          console.error("Attendance check-out failed:", error);
+          await axios.post(`${API_BASE}/check-out`, { username });
+        } catch (err) {
+          console.error("Check-out failed:", err);
         }
 
         set({
@@ -104,50 +103,37 @@ export const useAttendanceStore = create(
         });
       },
 
-      // ✅ AUTO CHECKOUT when DATE changes
-      autoCheckOutOnDateChange: async () => {
-        console.log("🕛 Auto checkout triggered due to date change!");
-        await get().checkOut();
-      },
+      // ✅ TIMER TICK
+      resumeTimerTick: () => {
+        const now = Date.now();
+        let workedTime = now - get().startTime! - get().breakElapsed;
 
-      // ✅ AUTO CHECKOUT at 12:00 AM
-      checkAutoCheckoutTime: async () => {
-        const now = new Date();
-        const targetHour = 0; // 12 AM in 24-hour format
-        const targetMinute = 0;
+        if (get().isOnBreak && get().breakStart) {
+          workedTime -= now - get().breakStart;
+        }
 
-        if (
-          now.getHours() === targetHour &&
-          now.getMinutes() === targetMinute &&
-          now.getSeconds() === 0
-        ) {
-          console.log("🌙 Auto checkout triggered at 12:00 AM!");
-          await get().checkOut();
+        set({ elapsedTime: workedTime });
+
+        // Auto checkout if date changed
+        const currentDate = new Date().toDateString();
+        if (get().date !== currentDate) get().checkOut();
+
+        // Optional: Auto checkout at 12:00 AM
+        const d = new Date();
+        if (d.getHours() === 0 && d.getMinutes() === 0 && d.getSeconds() === 0) {
+          get().checkOut();
         }
       },
 
-      // ✅ TOGGLE BREAK
-      toggleBreak: () => {
+      // ✅ RESUME TIMER
+      resumeTimer: () => {
         if (!get().isCheckedIn) return;
-
-        if (get().isOnBreak) {
-          const now = Date.now();
-          const breakDuration = now - get().breakStart;
-          set({
-            isOnBreak: false,
-            breakElapsed: get().breakElapsed + breakDuration,
-            breakStart: null,
-          });
-        } else {
-          set({
-            isOnBreak: true,
-            breakCount: get().breakCount + 1,
-            breakStart: Date.now(),
-          });
-        }
+        if (get().timerInterval) clearInterval(get().timerInterval);
+        const interval = setInterval(() => get().resumeTimerTick(), 1000);
+        set({ timerInterval: interval });
       },
 
-      // ✅ RESET ATTENDANCE
+      // ✅ RESET
       reset: () => {
         if (get().timerInterval) clearInterval(get().timerInterval);
         set({
@@ -161,35 +147,6 @@ export const useAttendanceStore = create(
           breakElapsed: 0,
           date: new Date().toDateString(),
         });
-      },
-
-      // ✅ RESUME TIMER (AFTER PAGE REFRESH)
-      resumeTimer: () => {
-        if (!get().isCheckedIn) return;
-
-        if (get().timerInterval) clearInterval(get().timerInterval);
-
-        const interval = setInterval(() => {
-          const now = Date.now();
-          let workedTime = now - get().startTime - get().breakElapsed;
-
-          if (get().isOnBreak && get().breakStart) {
-            const breakTime = now - get().breakStart;
-            workedTime -= breakTime;
-          }
-
-          set({ elapsedTime: workedTime });
-
-          const currentDate = new Date().toDateString();
-          if (get().date !== currentDate) {
-            get().autoCheckOutOnDateChange();
-          }
-
-          // 🔹 Auto checkout at 12:00 AM
-          get().checkAutoCheckoutTime();
-        }, 1000);
-
-        set({ timerInterval: interval });
       },
     }),
     {
