@@ -54,7 +54,7 @@ export default function TodaySummary() {
       elapsedTime: displayTime,
       breakCount,
     };
-    console.log("Local Attendance Record:", data);
+
     checkOut();
   };
 

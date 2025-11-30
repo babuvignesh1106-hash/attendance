@@ -1,173 +1,198 @@
+// src/stores/attendanceStore.js
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import axios from "axios";
 
-const API_BASE = "https://attendance-backend-bqhw.vercel.app/attendance";
+const API = "http://localhost:8000/attendance";
 
-export const useAttendanceStore = create(
-  persist(
-    (set, get) => ({
-      // STATE
-      isCheckedIn: false,
-      startTime: null, // number (timestamp) or null
-      elapsedTime: 0, // milliseconds
-      timerInterval: null, // will store setInterval ID
-      isOnBreak: false,
-      breakCount: 0,
-      breakStart: null, // number (timestamp) or null
-      breakElapsed: 0,
-      date: new Date().toDateString(),
+export const useAttendanceStore = create((set, get) => ({
+  // STATE
+  isCheckedIn: false,
+  isOnBreak: false,
+  startTime: null, // ms timestamp
+  elapsedTime: 0, // ms
+  breakStart: null, // ms timestamp
+  breakElapsed: 0, // ms (accumulated)
+  breakCount: 0,
 
-      // CHECK-IN
-      checkIn: async () => {
-        if (get().isCheckedIn) return;
+  timerInterval: null,
 
-        const username = localStorage.getItem("name") || "unknown";
+  username: localStorage.getItem("name") || "maari",
 
-        try {
-          await axios.post(`${API_BASE}/check-in`, { username });
-
-          const now = Date.now();
-          const interval = setInterval(() => get().resumeTimerTick(), 1000);
-
-          set({
-            isCheckedIn: true,
-            startTime: now,
-            timerInterval: interval,
-            breakElapsed: 0,
-            breakCount: 0,
-            isOnBreak: false,
-            breakStart: null,
-            elapsedTime: 0,
-            date: new Date().toDateString(),
-          });
-        } catch (err) {
-          console.error("Check-in failed:", err);
-        }
-      },
-
-      // TOGGLE BREAK
-      toggleBreak: async () => {
-        if (!get().isCheckedIn) return;
-
-        const username = localStorage.getItem("name") || "unknown";
-
-        try {
-          if (get().isOnBreak && get().breakStart !== null) {
-            // End break
-            await axios.post(`${API_BASE}/end-break`, { username });
-
-            const now = Date.now();
-            const breakDuration = now - get().breakStart;
-            set({
-              isOnBreak: false,
-              breakElapsed: get().breakElapsed + breakDuration,
-              breakStart: null,
-            });
-          } else {
-            // Start break
-            await axios.post(`${API_BASE}/start-break`, { username });
-            set({
-              isOnBreak: true,
-              breakCount: get().breakCount + 1,
-              breakStart: Date.now(),
-            });
-          }
-        } catch (err) {
-          console.error("Break toggle failed:", err);
-        }
-      },
-
-      // CHECK-OUT
-      checkOut: async () => {
-        if (!get().isCheckedIn) return;
-
-        const username = localStorage.getItem("name") || "unknown";
-
-        if (get().timerInterval) clearInterval(get().timerInterval);
-
-        try {
-          await axios.post(`${API_BASE}/check-out`, { username });
-        } catch (err) {
-          console.error("Check-out failed:", err);
-        }
-
-        set({
-          isCheckedIn: false,
-          startTime: null,
-          timerInterval: null,
-          isOnBreak: false,
-          breakStart: null,
-          breakElapsed: 0,
-          elapsedTime: 0,
-          breakCount: 0,
-          date: new Date().toDateString(),
-        });
-      },
-
-      // TIMER TICK
-      resumeTimerTick: () => {
-        const now = Date.now();
-        const startTime = get().startTime;
-        if (!startTime) return;
-
-        let workedTime = now - startTime - get().breakElapsed;
-
-        if (get().isOnBreak && get().breakStart !== null) {
-          workedTime -= now - get().breakStart;
-        }
-
-        set({ elapsedTime: workedTime });
-
-        const currentDate = new Date().toDateString();
-        if (get().date !== currentDate) get().checkOut();
-
-        const d = new Date();
-        if (
-          d.getHours() === 0 &&
-          d.getMinutes() === 0 &&
-          d.getSeconds() === 0
-        ) {
-          get().checkOut();
-        }
-      },
-
-      // RESUME TIMER
-      resumeTimer: () => {
-        if (!get().isCheckedIn) return;
-        if (get().timerInterval) clearInterval(get().timerInterval);
-        const interval = setInterval(() => get().resumeTimerTick(), 1000);
-        set({ timerInterval: interval });
-      },
-
-      // RESET
-      reset: () => {
-        if (get().timerInterval) clearInterval(get().timerInterval);
-        set({
-          isCheckedIn: false,
-          startTime: null,
-          elapsedTime: 0,
-          timerInterval: null,
-          isOnBreak: false,
-          breakCount: 0,
-          breakStart: null,
-          breakElapsed: 0,
-          date: new Date().toDateString(),
-        });
-      },
-    }),
-    {
-      name: "attendance-storage",
-      partialize: (state) => ({
-        isCheckedIn: state.isCheckedIn,
-        startTime: state.startTime,
-        elapsedTime: state.elapsedTime,
-        isOnBreak: state.isOnBreak,
-        breakCount: state.breakCount,
-        breakElapsed: state.breakElapsed,
-        breakStart: state.breakStart,
-        date: state.date,
-      }),
+  // INTERNAL TIMER START
+  _startTimer: () => {
+    if (get().timerInterval) {
+      clearInterval(get().timerInterval);
+      set({ timerInterval: null });
     }
-  )
-);
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const start = get().startTime;
+      if (!start) {
+        set({ elapsedTime: 0 });
+        return;
+      }
+
+      let worked = now - start - get().breakElapsed;
+
+      if (get().isOnBreak && get().breakStart) {
+        worked -= now - get().breakStart;
+      }
+
+      set({ elapsedTime: worked >= 0 ? worked : 0 });
+    }, 1000);
+
+    set({ timerInterval: interval });
+  },
+
+  _stopTimer: () => {
+    if (get().timerInterval) {
+      clearInterval(get().timerInterval);
+      set({ timerInterval: null });
+    }
+  },
+
+  // CHECK IN
+  checkIn: async () => {
+    const username = get().username;
+    try {
+      const res = await axios.post(`${API}/check-in`, { username });
+      const startMs = new Date(res.data.startTime).getTime();
+
+      set({
+        isCheckedIn: true,
+        isOnBreak: false,
+        startTime: startMs,
+        breakStart: null,
+        breakElapsed: 0,
+        breakCount: 0,
+        elapsedTime: 0,
+      });
+
+      get()._startTimer();
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // START BREAK
+  startBreak: async () => {
+    const username = get().username;
+    try {
+      await axios.post(`${API}/start-break`, { username });
+      set({
+        isOnBreak: true,
+        breakStart: Date.now(),
+        breakCount: get().breakCount + 1,
+      });
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // END BREAK
+  endBreak: async () => {
+    const username = get().username;
+    const bstart = get().breakStart;
+    if (!bstart) return;
+
+    try {
+      await axios.post(`${API}/end-break`, { username });
+
+      const now = Date.now();
+      const passed = now - bstart;
+
+      set({
+        isOnBreak: false,
+        breakStart: null,
+        breakElapsed: get().breakElapsed + passed,
+      });
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // ✅ ADDED: TOGGLE BREAK
+  toggleBreak: async () => {
+    const { isOnBreak, startBreak, endBreak } = get();
+    if (isOnBreak) {
+      await endBreak();
+    } else {
+      await startBreak();
+    }
+  },
+
+  // CHECK OUT
+  checkOut: async () => {
+    const username = get().username;
+    try {
+      await axios.post(`${API}/check-out`, { username });
+
+      get()._stopTimer();
+
+      set({
+        isCheckedIn: false,
+        isOnBreak: false,
+        startTime: null,
+        elapsedTime: 0,
+        breakStart: null,
+        breakElapsed: 0,
+        breakCount: 0,
+      });
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // RESUME FROM BACKEND
+  resumeFromBackend: async () => {
+    const username = get().username;
+    try {
+      const res = await axios.get(`${API}`);
+      const todayOpen = Array.isArray(res.data)
+        ? res.data.find((r) => r.username === username && !r.endTime)
+        : null;
+
+      if (!todayOpen) return;
+
+      const start = new Date(todayOpen.startTime).getTime();
+      const totalBreakMs = (todayOpen.totalBreakDuration || 0) * 1000;
+      const onBreak = todayOpen.currentBreakStart != null;
+      const breakStartMs = onBreak
+        ? new Date(todayOpen.currentBreakStart).getTime()
+        : null;
+
+      set({
+        isCheckedIn: true,
+        startTime: start,
+        breakCount: todayOpen.breakCount || 0,
+        breakElapsed: totalBreakMs,
+        isOnBreak: onBreak,
+        breakStart: breakStartMs,
+      });
+
+      get()._startTimer();
+    } catch (err) {
+      throw err;
+    }
+  },
+
+  // Alias for UI
+  resumeTimer: async () => {
+    return get().resumeFromBackend();
+  },
+
+  resetLocal: () => {
+    get()._stopTimer();
+    set({
+      isCheckedIn: false,
+      isOnBreak: false,
+      startTime: null,
+      elapsedTime: 0,
+      breakStart: null,
+      breakElapsed: 0,
+      breakCount: 0,
+      timerInterval: null,
+    });
+  },
+}));
