@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API = "http://localhost:8000/attendance";
+const API = "https://attendance-backend-bqhw.vercel.app/attendance";
 
 export const useAttendanceStore = create((set, get) => ({
   // STATE
