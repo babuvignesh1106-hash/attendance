@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API = "http://localhost:8000/attendance"; // adjust if deployed
+const API = "https://attendance-backend-bqhw.vercel.app/attendance"; // adjust if deployed
 const JSON_HEADERS = { headers: { "Content-Type": "application/json" } };
 
 let _interval = null;
