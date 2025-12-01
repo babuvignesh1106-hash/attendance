@@ -115,23 +115,24 @@ export default function WeeklyStatusChart() {
         );
 
         const weekData = {
+          Sun: { workedDuration: 0, breakCount: 0 },
           Mon: { workedDuration: 0, breakCount: 0 },
           Tue: { workedDuration: 0, breakCount: 0 },
           Wed: { workedDuration: 0, breakCount: 0 },
           Thu: { workedDuration: 0, breakCount: 0 },
           Fri: { workedDuration: 0, breakCount: 0 },
           Sat: { workedDuration: 0, breakCount: 0 },
-          Sun: { workedDuration: 0, breakCount: 0 },
         };
 
+        // Group entries by date
         const groupedByDate = {};
-
         userData.forEach((entry) => {
           const dateKey = new Date(entry.startTime).toDateString();
           if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
           groupedByDate[dateKey].push(entry);
         });
 
+        // Sum worked hours and breaks per day
         Object.keys(groupedByDate).forEach((dateKey) => {
           const entries = groupedByDate[dateKey];
           const totalWorkedSeconds = entries.reduce(
@@ -143,10 +144,10 @@ export default function WeeklyStatusChart() {
             0
           );
 
-          const weekday = new Date(entries[0].startTime).toLocaleDateString(
-            "en-US",
-            { weekday: "short" }
-          );
+          const localDate = new Date(entries[0].startTime);
+          const dayIndex = localDate.getDay(); // 0=Sun, 1=Mon, ...
+          const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+          const weekday = weekdays[dayIndex];
 
           const workedHours = totalWorkedSeconds / 3600;
 
@@ -227,19 +228,13 @@ export default function WeeklyStatusChart() {
 
         {/* CHART */}
         <ResponsiveContainer width="100%" height={350}>
-          <BarChart
-            data={data}
-            barGap={6} // IMPORTANT
-            barCategoryGap="10%" // IMPORTANT
-          >
+          <BarChart data={data} barGap={6} barCategoryGap="10%">
             <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} />
-
             <XAxis dataKey="day" tick={<CustomXAxisTick />} />
-
             <YAxis
               type="number"
               domain={[0, 14]}
-              allowDecimals={false} // IMPORTANT
+              allowDecimals={false}
               ticks={[0, 2, 4, 6, 8, 10, 12, 14]}
               tick={{ fill: "#374151", fontSize: 14, fontWeight: "bold" }}
             >
@@ -247,11 +242,7 @@ export default function WeeklyStatusChart() {
                 value="Hours"
                 angle={-90}
                 position="insideLeft"
-                style={{
-                  textAnchor: "middle",
-                  fill: "#6b7280",
-                  fontSize: 14,
-                }}
+                style={{ textAnchor: "middle", fill: "#6b7280", fontSize: 14 }}
               />
             </YAxis>
 
@@ -261,23 +252,19 @@ export default function WeeklyStatusChart() {
             <Bar
               dataKey="workedDuration"
               radius={[6, 6, 0, 0]}
-              minPointSize={6} // FIX for hover on zero-value days
-              isAnimationActive={false} // Prevent hiding during animation
+              minPointSize={6}
+              isAnimationActive={false}
             >
               {data.map((entry, index) => {
-                const isWeekend = entry.day === "Sat" || entry.day === "Sun";
-                const isNonWorking = entry.workedDuration === 0;
-
                 const dayIndex = [
+                  "Sun",
                   "Mon",
                   "Tue",
                   "Wed",
                   "Thu",
                   "Fri",
                   "Sat",
-                  "Sun",
                 ].indexOf(entry.day);
-
                 const entryDate = new Date(weekStart);
                 entryDate.setDate(weekStart.getDate() + dayIndex);
 
@@ -285,7 +272,7 @@ export default function WeeklyStatusChart() {
 
                 let fillColor;
                 if (isFuture) fillColor = INACTIVE_GRAY;
-                else if (isWeekend || isNonWorking) fillColor = WEEKEND_YELLOW;
+                else if (entry.workedDuration === 0) fillColor = WEEKEND_YELLOW;
                 else fillColor = WEEKDAY_BLUE;
 
                 return <Cell key={index} fill={fillColor} />;

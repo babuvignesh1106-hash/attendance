@@ -1,62 +1,41 @@
-import React, { useEffect, useState } from "react";
+// src/components/TodaySummary.jsx
+import React, { useEffect } from "react";
 import { useAttendanceStore } from "../store/attendanceStore";
 
 export default function TodaySummary() {
-  const {
-    isCheckedIn,
-    startTime,
-    elapsedTime,
-    breakCount,
-    checkIn,
-    checkOut,
-    isOnBreak,
-  } = useAttendanceStore();
+  // Subscribe to only the necessary states to trigger re-render
+  const elapsedTime = useAttendanceStore((state) => state.elapsedTime);
+  const isCheckedIn = useAttendanceStore((state) => state.isCheckedIn);
+  const startTime = useAttendanceStore((state) => state.startTime);
+  const breakCount = useAttendanceStore((state) => state.breakCount);
+  const isOnBreak = useAttendanceStore((state) => state.isOnBreak);
+  const checkIn = useAttendanceStore((state) => state.checkIn);
+  const checkOut = useAttendanceStore((state) => state.checkOut);
+  const resumeTimer = useAttendanceStore((state) => state.resumeTimer);
 
-  const [displayTime, setDisplayTime] = useState("00:00:00");
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const totalSeconds = Math.floor(elapsedTime / 1000);
-      const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-      const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
-        2,
-        "0"
-      );
-      const seconds = String(totalSeconds % 60).padStart(2, "0");
-      setDisplayTime(`${hours}:${minutes}:${seconds}`);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [elapsedTime]);
-
-  // Format ms → HH:MM:SS
-  function formatTime(ms) {
+  // Format milliseconds → HH:MM:SS
+  const formatTime = (ms) => {
     const totalSec = Math.floor(ms / 1000);
     const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
     const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
     const s = String(totalSec % 60).padStart(2, "0");
     return `${h}:${m}:${s}`;
-  }
+  };
 
-  const eightHours = 8 * 60 * 60 * 1000;
+  // Resume timer on mount
+  useEffect(() => {
+    resumeTimer();
+  }, [resumeTimer]);
+
+  const displayTime = formatTime(elapsedTime);
+
+  const eightHours = 8 * 60 * 60 * 1000; // 8 hours in ms
   const fillPercent = Math.min((elapsedTime / eightHours) * 100, 100);
   const overtimeMs = elapsedTime > eightHours ? elapsedTime - eightHours : 0;
   const overtimeDisplay = formatTime(overtimeMs);
 
-  // 🟢 Check-In handler
   const handleCheckIn = () => checkIn();
-
-  // 🔴 Direct Check-Out handler (no dialog)
-  const handleCheckOut = () => {
-    const data = {
-      startTime: startTime ? new Date(startTime).toLocaleTimeString() : "--:--",
-      endTime: new Date().toLocaleTimeString(),
-      elapsedTime: displayTime,
-      breakCount,
-    };
-
-    checkOut();
-  };
+  const handleCheckOut = () => checkOut();
 
   return (
     <div className="w-full rounded-xl p-4 sm:p-6 md:p-8 lg:p-10 bg-white flex flex-col gap-6">
@@ -75,12 +54,12 @@ export default function TodaySummary() {
                   #22c55e ${fillPercent * 3.6}deg,
                   #f2f3f4 ${fillPercent * 3.6}deg
                 )`,
-                transition: "background 0.5s linear",
+                transition: "background 1s linear",
               }}
             >
               <div className="absolute inset-[15%] rounded-full bg-green-400 flex flex-col items-center justify-center text-center">
                 <div className="text-black font-bold text-2xl sm:text-3xl md:text-4xl">
-                  {formatTime(elapsedTime)}
+                  {displayTime}
                 </div>
                 <div className="text-green-800 font-semibold text-sm sm:text-base md:text-lg mt-1">
                   {isOnBreak ? "On Break" : "Working"}
