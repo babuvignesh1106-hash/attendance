@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import GeneratePayslip from "./GeneratePayslip";
 import PayslipForm from "./PayslipForm";
+import { ROUTES } from "../../constants/routes";
 
 const months = [
   "January",
@@ -18,7 +19,7 @@ const months = [
   "December",
 ];
 
-const PayrollDashboard = () => {
+const PayrollDashboard = ({ setActivePage }) => {
   const [payslips, setPayslips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPayslip, setSelectedPayslip] = useState(null);
@@ -80,6 +81,13 @@ const PayrollDashboard = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      <button
+        type="button"
+        onClick={() => setActivePage(ROUTES.PAYROLL)}
+        className="flex-1 bg-gray-500 text-white px-2 py-3 rounded-xl hover:bg-gray-600 transition"
+      >
+        Back
+      </button>
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
         Payroll Dashboard
       </h1>

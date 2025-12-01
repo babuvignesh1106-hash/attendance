@@ -14,7 +14,6 @@ import { ROUTES } from "../../constants/routes";
 
 const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
   const [openPermission, setOpenPermission] = useState(false);
-  const [openPayroll, setOpenPayroll] = useState(false);
   const [role, setRole] = useState("");
 
   useEffect(() => {
@@ -25,11 +24,6 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
   const permissionItems = [
     { label: "Leave Request", route: ROUTES.LEAVEDASHBOARD },
     { label: "Permission Request", route: ROUTES.PERMISSIONDASHBOARD },
-  ];
-
-  const payrollItems = [
-    { label: "Payroll Dashboard", route: ROUTES.PAYROLL_DASHBOARD },
-    { label: "Payslip Form", route: ROUTES.PAYSLIPFORM },
   ];
 
   return (
@@ -73,36 +67,13 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
             active={activePage === ROUTES.ADMINDASHBOARD}
           />
 
-          {/* Payroll Dropdown */}
-          <div className="mx-2 mt-3">
-            <button
-              className="w-full flex items-center justify-between bg-[#023e8a] px-4 py-3 rounded-lg text-lg font-semibold hover:bg-[#0353a4] transition"
-              onClick={() => setOpenPayroll((prev) => !prev)}
-            >
-              <span className="flex items-center gap-2">
-                <FaMoneyCheckAlt /> Payroll
-              </span>
-              {openPayroll ? <FaChevronUp /> : <FaChevronDown />}
-            </button>
-
-            <div
-              className={`bg-gray-100 rounded-lg shadow-md mt-2 overflow-hidden transition-all duration-300 ${
-                openPayroll ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-              }`}
-            >
-              {payrollItems.map((item, i) => (
-                <div
-                  key={i}
-                  className={`text-center px-3 py-2 m-2 rounded-md bg-white text-[#0077b6] text-sm font-medium cursor-pointer hover:bg-blue-50 hover:scale-[1.02] transition ${
-                    activePage === item.route ? "bg-blue-100 font-bold" : ""
-                  }`}
-                  onClick={() => onNavigate(item.route)}
-                >
-                  {item.label}
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Payroll – direct click (DROPDOWN REMOVED) */}
+          <EmpSidebarItem
+            icon={<FaMoneyCheckAlt />}
+            label="Payroll"
+            onClick={() => onNavigate(ROUTES.PAYROLL)}
+            active={activePage === ROUTES.PAYROLL_DASHBOARD}
+          />
         </>
       )}
 

@@ -54,6 +54,13 @@ export default function StaffList({ setActivePage }) {
 
       <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
         <button
+          type="button"
+          onClick={() => setActivePage(ROUTES.STAFF_DASHBOARD)}
+          className=" bg-gray-500 text-white px-2 py-3 rounded-xl hover:bg-gray-600 transition"
+        >
+          Back
+        </button>
+        <button
           onClick={handleAdd}
           className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
         >
