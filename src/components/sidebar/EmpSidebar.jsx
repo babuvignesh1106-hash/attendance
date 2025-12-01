@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import EmpSidebarItem from "./EmpSidebarItem";
 import { ROUTES } from "../../constants/routes";
+import { motion, AnimatePresence } from "framer-motion";
 
 const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
   const [openPermission, setOpenPermission] = useState(false);
@@ -27,10 +28,11 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
   ];
 
   return (
-    <aside
-      className={`fixed left-0 h-full w-60 bg-[#0077b6] text-white shadow-lg transition-transform duration-300 z-[900] ${
-        isOpen ? "translate-x-0" : "-translate-x-60"
-      }`}
+    <motion.aside
+      initial={{ x: -300, opacity: 0 }}
+      animate={{ x: isOpen ? 0 : -300, opacity: isOpen ? 1 : 0 }}
+      transition={{ type: "spring", stiffness: 120, damping: 20 }}
+      className="fixed left-0 h-full w-60 bg-[#0077b6] text-white shadow-lg z-[900]"
     >
       {/* Dashboard */}
       <EmpSidebarItem
@@ -48,26 +50,21 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
         active={activePage === ROUTES.CALENDARGRID}
       />
 
-      {/* ADMIN ONLY SECTION */}
+      {/* Admin Only Section */}
       {role === "admin" && (
         <>
-          {/* Employees */}
           <EmpSidebarItem
             icon={<FaUsers />}
             label="Employees"
             onClick={() => onNavigate(ROUTES.STAFF_DASHBOARD)}
             active={activePage === ROUTES.STAFF_DASHBOARD}
           />
-
-          {/* Admin Dashboard */}
           <EmpSidebarItem
             icon={<FaTable />}
             label="Admin Dashboard"
             onClick={() => onNavigate(ROUTES.ADMINDASHBOARD)}
             active={activePage === ROUTES.ADMINDASHBOARD}
           />
-
-          {/* Payroll – direct click (DROPDOWN REMOVED) */}
           <EmpSidebarItem
             icon={<FaMoneyCheckAlt />}
             label="Payroll"
@@ -77,7 +74,7 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
         </>
       )}
 
-      {/* EMPLOYEE ONLY SECTION */}
+      {/* Employee Only Section */}
       {role === "employee" && (
         <EmpSidebarItem
           icon={<FaMoneyCheckAlt />}
@@ -87,7 +84,7 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
         />
       )}
 
-      {/* Permission Dropdown (Visible for ALL roles) */}
+      {/* Permission Dropdown */}
       <div className="mx-2 mt-3">
         <button
           className="w-full flex items-center justify-between bg-[#023e8a] px-4 py-3 rounded-lg text-lg font-semibold hover:bg-[#0353a4] transition"
@@ -99,25 +96,35 @@ const EmpSidebar = ({ isOpen, onNavigate, activePage }) => {
           {openPermission ? <FaChevronUp /> : <FaChevronDown />}
         </button>
 
-        <div
-          className={`bg-gray-100 rounded-lg shadow-md mt-2 overflow-hidden transition-all duration-300 ${
-            openPermission ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
-          {permissionItems.map((item, i) => (
-            <div
-              key={i}
-              className={`text-center px-3 py-2 m-2 rounded-md bg-white text-[#0077b6] text-sm font-medium cursor-pointer hover:bg-blue-50 hover:scale-[1.02] transition ${
-                activePage === item.route ? "bg-blue-100 font-bold" : ""
-              }`}
-              onClick={() => onNavigate(item.route)}
+        <AnimatePresence>
+          {openPermission && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="bg-gray-100 rounded-lg shadow-md mt-2 overflow-hidden"
             >
-              {item.label}
-            </div>
-          ))}
-        </div>
+              {permissionItems.map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className={`text-center px-3 py-2 m-2 rounded-md bg-white text-[#0077b6] text-sm font-medium cursor-pointer hover:bg-blue-50 hover:scale-[1.02] transition ${
+                    activePage === item.route ? "bg-blue-100 font-bold" : ""
+                  }`}
+                  onClick={() => onNavigate(item.route)}
+                >
+                  {item.label}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </aside>
+    </motion.aside>
   );
 };
 
