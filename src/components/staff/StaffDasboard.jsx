@@ -35,7 +35,7 @@ export default function StaffDasboard({ setActivePage }) {
       <div className="absolute bottom-10 right-10 w-64 h-64 bg-emerald-300 rounded-full blur-3xl opacity-20 animate-pulse"></div>
 
       <h1 className="text-4xl sm:text-5xl font-extrabold text-green-700 mb-10 drop-shadow-md">
-        Payroll Dashboard
+        Employee Dashboard
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 w-full max-w-5xl z-10">
