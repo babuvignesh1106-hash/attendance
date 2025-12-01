@@ -2,12 +2,12 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API = "https://attendance-backend-bqhw.vercel.app/attendance"; // adjust if deployed
+const API = "https://attendance-backend-bqhw.vercel.app/attendance";
 const JSON_HEADERS = { headers: { "Content-Type": "application/json" } };
 
 let _interval = null;
 
-// Helper: format milliseconds into hh:mm:ss
+// Format milliseconds → HH:MM:SS
 const formatMs = (ms = 0) => {
   const totalSec = Math.floor(ms / 1000);
   const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
@@ -22,21 +22,20 @@ export const useAttendanceStore = create((set, get) => ({
   // STATE
   isCheckedIn: false,
   isOnBreak: false,
-  startTime: null, // timestamp in ms
-  elapsedTime: 0, // milliseconds
-  breakStart: null, // timestamp in ms for current break
-  breakElapsed: 0, // total break duration in ms
+  startTime: null,
+  elapsedTime: 0,
+  breakStart: null,
+  breakElapsed: 0,
   breakCount: 0,
 
-  // ---------------------------
-  // INTERNAL TIMER
-  // ---------------------------
+  // TIMER --------------------------
   _startTimer: () => {
-    get()._stopTimer(); // ensure no duplicate intervals
+    get()._stopTimer();
     if (!get().startTime) return;
 
     _interval = setInterval(() => {
       const now = Date.now();
+
       let worked = now - get().startTime - get().breakElapsed;
 
       if (get().isOnBreak && get().breakStart) {
@@ -54,9 +53,7 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  // ---------------------------
-  // CHECK-IN
-  // ---------------------------
+  // CHECK-IN ------------------------
   checkIn: async () => {
     const username = get().username;
     try {
@@ -67,7 +64,8 @@ export const useAttendanceStore = create((set, get) => ({
       );
       const data = res.data;
 
-      const startMs = new Date(data.startTime).getTime();
+      // FIXED: parse backend UTC time correctly
+      const startMs = Date.parse(data.startTime);
 
       set({
         isCheckedIn: true,
@@ -86,11 +84,10 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  // ---------------------------
-  // BREAK HANDLERS
-  // ---------------------------
+  // BREAK START ------------------------
   startBreak: async () => {
     const username = get().username;
+
     try {
       const res = await axios.post(
         `${API}/start-break`,
@@ -99,11 +96,11 @@ export const useAttendanceStore = create((set, get) => ({
       );
       const data = res.data;
 
-      get()._stopTimer(); // pause main timer
+      get()._stopTimer();
 
       set({
         isOnBreak: true,
-        breakStart: new Date(data.currentBreakStart).getTime(),
+        breakStart: Date.parse(data.currentBreakStart), // FIXED
         breakCount: data.breakCount,
       });
     } catch (err) {
@@ -112,9 +109,11 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
+  // BREAK END ------------------------
   endBreak: async () => {
     const username = get().username;
     const bstart = get().breakStart;
+
     if (!bstart) return;
 
     try {
@@ -131,7 +130,7 @@ export const useAttendanceStore = create((set, get) => ({
         breakElapsed: (data.totalBreakDuration || 0) * 1000,
       });
 
-      get()._startTimer(); // resume timer
+      get()._startTimer();
     } catch (err) {
       console.error("END BREAK ERROR:", err);
       if (err.response?.data?.message) alert(err.response.data.message);
@@ -143,15 +142,15 @@ export const useAttendanceStore = create((set, get) => ({
     else await get().startBreak();
   },
 
-  // ---------------------------
-  // CHECK-OUT
-  // ---------------------------
+  // CHECK-OUT ------------------------
   checkOut: async () => {
     const username = get().username;
+
     try {
       await axios.post(`${API}/check-out`, { username }, JSON_HEADERS);
 
       get()._stopTimer();
+
       set({
         isCheckedIn: false,
         isOnBreak: false,
@@ -167,30 +166,31 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  // ---------------------------
-  // RESUME SESSION FROM BACKEND
-  // ---------------------------
+  // RESUME SESSION ------------------------
   resumeFromBackend: async () => {
     const username = get().username;
     try {
       const res = await axios.get(`${API}`);
       const data = Array.isArray(res.data) ? res.data : res.data.records || [];
+
       const todayOpen = data.find((r) => r.username === username && !r.endTime);
 
       if (!todayOpen) return;
 
-      const startMs = new Date(todayOpen.startTime).getTime();
+      const startMs = Date.parse(todayOpen.startTime); // FIXED
       const breakElapsed = (todayOpen.totalBreakDuration || 0) * 1000;
+
       const onBreak = todayOpen.currentBreakStart != null;
+
       const breakStartMs = onBreak
-        ? new Date(todayOpen.currentBreakStart).getTime()
+        ? Date.parse(todayOpen.currentBreakStart) // FIXED
         : null;
 
       set({
         isCheckedIn: true,
         startTime: startMs,
-        breakCount: todayOpen.breakCount || 0,
         breakElapsed,
+        breakCount: todayOpen.breakCount || 0,
         isOnBreak: onBreak,
         breakStart: breakStartMs,
       });
@@ -203,9 +203,7 @@ export const useAttendanceStore = create((set, get) => ({
 
   resumeTimer: async () => get().resumeFromBackend(),
 
-  // ---------------------------
-  // RESET LOCAL STATE
-  // ---------------------------
+  // RESET ------------------------
   resetLocal: () => {
     get()._stopTimer();
     set({
@@ -219,8 +217,6 @@ export const useAttendanceStore = create((set, get) => ({
     });
   },
 
-  // ---------------------------
   // FORMATTER
-  // ---------------------------
   formatElapsed: (ms) => formatMs(ms),
 }));
