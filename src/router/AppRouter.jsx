@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"; // ✅ Correct import
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ROUTES } from "../constants/routes";
 import Dashboard from "../pages/Dashboard";
 import EmpSidebar from "../components/sidebar/EmpSidebar";
@@ -9,7 +9,7 @@ import Calendar from "../components/calendar/Calendar";
 import EmployeePopup from "../components/calendar/EmployeePopup";
 import Login from "../pages/Login/Login";
 import Signup from "../pages/Signup";
-import ProtectedRoute from "../router/ProtectedRoute"; // ✅ Add this for route protection
+import ProtectedRoute from "../router/ProtectedRoute";
 import CheckOutDialog from "../components/CheckOutDialog";
 import LeaveRequestForm from "../pages/LeaveRequestForm";
 import PermissionRequestForm from "../components/permission/PermissionRequestForm";
@@ -29,6 +29,8 @@ import StaffTable from "../components/staff/StaffTable";
 import NewEmpPayroll from "../components/NewEmpPayroll";
 import PayRoll from "../components/payslip/PayRoll";
 import StaffDasboard from "../components/staff/StaffDasboard";
+import Unauthorized from "../pages/Unauthorized";
+import NotFound from "../pages/NotFound"; // ⭐ ADD THIS
 
 export default function AppRouter() {
   return (
@@ -37,11 +39,10 @@ export default function AppRouter() {
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path={ROUTES.SIGNUP} element={<Signup />} />
+        <Route path={ROUTES.UNAUTHORIZED} element={<Unauthorized />} />
 
         {/* Protected Routes */}
-        <Route
-          element={<ProtectedRoute />} // ✅ Protect all routes below
-        >
+        <Route element={<ProtectedRoute />}>
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.SIDEBAR} element={<EmpSidebar />} />
           <Route path={ROUTES.SIDEBARITEM} element={<EmpSidebarItem />} />
@@ -52,7 +53,6 @@ export default function AppRouter() {
             path={ROUTES.WEEKLYSTATUSCHART}
             element={<WeeklyStatusChart />}
           />
-
           <Route path={ROUTES.CHECKOUT} element={<CheckOutDialog />} />
           <Route
             path={ROUTES.LEAVEREQUESTFORM}
@@ -81,15 +81,16 @@ export default function AppRouter() {
           <Route path={ROUTES.PAYROLL_GENERATE} element={<GeneratePayslip />} />
           <Route path={ROUTES.PAYSLIPFORM} element={<PayslipForm />} />
           <Route path={ROUTES.PAYROLL} element={<PayRoll />} />
-
           <Route path={ROUTES.STAFF_FORM} element={<StaffForm />} />
           <Route path={ROUTES.STAFF_EDIT} element={<StaffEdit />} />
           <Route path={ROUTES.STAFF_LIST} element={<StaffList />} />
           <Route path={ROUTES.STAFF_TABLE} element={<StaffTable />} />
           <Route path={ROUTES.STAFF_DASHBOARD} element={<StaffDasboard />} />
-
           <Route path={ROUTES.NEW_EMP_PAY} element={<NewEmpPayroll />} />
         </Route>
+
+        {/* ⭐ MUST BE LAST — 404 Page */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

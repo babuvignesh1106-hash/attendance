@@ -16,7 +16,7 @@ export const ROUTES = {
   ADMIN: "/admin",
   ADMINFORM: "/adminform",
   LOGIN: "/login",
-  SIGNUP: "/signup",
+  SIGNUP: "/Ascentwaresignup",
   CHECKOUT: "/checkout",
   LEAVEREQUESTFORM: "/leaverequestform",
   PERMISSIONREQUESTFORM: "/permissionrequestform",
@@ -36,4 +36,6 @@ export const ROUTES = {
   STAFF_TABLE: "/staff-table",
   STAFF_DASHBOARD: "/staff-dashboard",
   NEW_EMP_PAY: "/new-emp-pay",
+  UNAUTHORIZED: "/unauthorized",
+  NOTFOUND: "/notfound",
 };
