@@ -24,6 +24,15 @@ export default function BreakTime() {
     setBreakTime(savedBreakTime);
     setBreakStartTime(savedBreakStart);
   }, []);
+  useEffect(() => {
+    if (!isCheckedIn) {
+      // Reset break and work timers when checked out
+      setBreakTime(0);
+      setBreakStartTime(0);
+      localStorage.removeItem("breakTime");
+      localStorage.removeItem("breakStartTime");
+    }
+  }, [isCheckedIn]);
 
   // 🕒 Track timer
   useEffect(() => {

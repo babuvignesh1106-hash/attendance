@@ -18,6 +18,20 @@ const months = [
   "December",
 ];
 
+// Convert backend UTC timestamp → LOCAL IST date
+const convertUTCToLocalDate = (utcString) => {
+  const utc = new Date(utcString);
+
+  return new Date(
+    utc.getUTCFullYear(),
+    utc.getUTCMonth(),
+    utc.getUTCDate(),
+    utc.getUTCHours(),
+    utc.getUTCMinutes(),
+    utc.getUTCSeconds()
+  );
+};
+
 export default function CalendarGrid() {
   const [attendanceData, setAttendanceData] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -28,7 +42,7 @@ export default function CalendarGrid() {
 
   const username = localStorage.getItem("name") || "";
 
-  // ✅ Fetch & aggregate data per date
+  // Fetch & aggregate data
   const fetchAttendance = () => {
     setLoading(true);
     setError(null);
@@ -41,19 +55,20 @@ export default function CalendarGrid() {
           return;
         }
 
-        // Filter user-specific records
         const userRecords = res.data.filter((r) => r.username === username);
 
-        // ✅ Group by date (same day = aggregate)
         const grouped = {};
+
         userRecords.forEach((rec) => {
           if (!rec.startTime) return;
-          const d = new Date(rec.startTime);
-          const dateKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
-          if (!grouped[dateKey]) {
-            grouped[dateKey] = {
-              date: d,
+          const localDate = convertUTCToLocalDate(rec.startTime);
+
+          const key = `${localDate.getFullYear()}-${localDate.getMonth()}-${localDate.getDate()}`;
+
+          if (!grouped[key]) {
+            grouped[key] = {
+              date: localDate,
               username: rec.username,
               workedDuration: 0,
               totalBreakDuration: 0,
@@ -62,24 +77,22 @@ export default function CalendarGrid() {
             };
           }
 
-          grouped[dateKey].workedDuration += rec.workedDuration || 0;
-          grouped[dateKey].totalBreakDuration += rec.totalBreakDuration || 0;
-          grouped[dateKey].breakCount += rec.breakCount || 0;
-          grouped[dateKey].sessions.push(rec);
+          grouped[key].workedDuration += rec.workedDuration || 0;
+          grouped[key].totalBreakDuration += rec.totalBreakDuration || 0;
+          grouped[key].breakCount += rec.breakCount || 0;
+          grouped[key].sessions.push(rec);
         });
 
-        // Convert to array
-        const aggregated = Object.values(grouped);
-        setAttendanceData(aggregated);
+        setAttendanceData(Object.values(grouped));
       })
       .catch((err) => {
         console.error("Failed to fetch attendance:", err);
-        setError("Failed to fetch attendance (see console).");
+        setError("Failed to fetch attendance");
       })
       .finally(() => setLoading(false));
   };
 
-  // Auto refresh every 10s
+  // Auto refresh every 10 seconds
   useEffect(() => {
     fetchAttendance();
     const interval = setInterval(fetchAttendance, 10000);
@@ -90,7 +103,6 @@ export default function CalendarGrid() {
   const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
   const today = new Date();
 
-  // ✅ Find aggregated record for the date
   const findRecordForDay = (day) => {
     return attendanceData.find((item) => {
       const d = item.date;
@@ -108,8 +120,8 @@ export default function CalendarGrid() {
     future: "bg-gray-200 text-gray-500 border-gray-300",
   };
 
-  // ✅ Mark working, no-data, weekend, or future
   const totalCells = firstDayOfMonth + daysInMonth;
+
   const exampleDates = Array.from({ length: totalCells }, (_, i) => {
     const dayNum = i - firstDayOfMonth + 1;
 
@@ -122,15 +134,12 @@ export default function CalendarGrid() {
     let status = "future";
 
     if (record) {
-      status = "working"; // ✅ Worked
+      status = "working";
     } else {
       const isWeekend = weekday === 0 || weekday === 6;
       const isPastOrToday = tempDate <= today;
-      if (isWeekend || isPastOrToday) {
-        status = "holiday"; // 💛 Weekend or No Data
-      } else {
-        status = "future"; // ⚪ Future days
-      }
+
+      if (isWeekend || isPastOrToday) status = "holiday";
     }
 
     return { day: dayNum, status, record };
@@ -161,6 +170,7 @@ export default function CalendarGrid() {
         <h3 className="text-2xl font-bold text-indigo-600">
           Attendance Calendar
         </h3>
+
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrevMonth}
@@ -199,6 +209,7 @@ export default function CalendarGrid() {
       <div className="grid grid-cols-7 gap-6">
         {exampleDates.map((d, i) => {
           if (d.blank) return <div key={`blank-${i}`} className="h-10"></div>;
+
           const isToday =
             d.day === today.getDate() &&
             currentMonth === today.getMonth() &&
@@ -227,7 +238,7 @@ export default function CalendarGrid() {
         })}
       </div>
 
-      {/* ✅ Legend Section */}
+      {/* Legend */}
       <div className="flex justify-center gap-4 mt-18 text-lg text-gray-600">
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 rounded-sm bg-green-400 border border-green-500"></div>
@@ -243,7 +254,6 @@ export default function CalendarGrid() {
         </div>
       </div>
 
-      {/* Employee Popup */}
       {selectedRecord && (
         <EmployeePopup
           record={selectedRecord}

@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useAttendanceStore } from "../store/attendanceStore";
 
 export default function TodaySummary() {
+  // Subscribe to only the necessary states to trigger re-render
   const elapsedTime = useAttendanceStore((state) => state.elapsedTime);
   const isCheckedIn = useAttendanceStore((state) => state.isCheckedIn);
   const startTime = useAttendanceStore((state) => state.startTime);
@@ -28,7 +29,7 @@ export default function TodaySummary() {
 
   const displayTime = formatTime(elapsedTime);
 
-  const eightHours = 8 * 60 * 60 * 1000;
+  const eightHours = 8 * 60 * 60 * 1000; // 8 hours in ms
   const fillPercent = Math.min((elapsedTime / eightHours) * 100, 100);
   const overtimeMs = elapsedTime > eightHours ? elapsedTime - eightHours : 0;
   const overtimeDisplay = formatTime(overtimeMs);
@@ -68,28 +69,21 @@ export default function TodaySummary() {
           </div>
         </div>
 
-        {/* Check-In / Check-Out */}
+        {/* Check-In / Check-Out Box */}
         <div className="bg-green-200 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col gap-4 sm:gap-6 shadow-md border border-green-300 w-full max-w-md mx-auto">
           <div className="text-center font-bold text-lg sm:text-xl md:text-2xl text-blue-600">
             {isCheckedIn ? "Checked In" : "Not Checked In"}
           </div>
 
           <div className="flex justify-between text-center">
-            {/* Start Time */}
             <div className="flex flex-col items-center gap-1 w-1/2">
               <span className="text-green-700 font-bold text-xl sm:text-2xl md:text-3xl">
-                {startTime
-                  ? new Date(startTime).toLocaleTimeString("en-IN", {
-                      hour12: true,
-                    })
-                  : "--:--"}
+                {startTime ? new Date(startTime).toLocaleTimeString() : "--:--"}
               </span>
               <span className="text-gray-700 text-sm sm:text-base md:text-lg">
                 Start
               </span>
             </div>
-
-            {/* End Time */}
             <div className="flex flex-col items-center gap-1 w-1/2">
               <span className="text-red-700 font-bold text-xl sm:text-2xl md:text-3xl">
                 {isCheckedIn ? "Now" : "--:--"}

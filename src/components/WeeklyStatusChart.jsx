@@ -15,9 +15,9 @@ import {
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 // 🎨 Color codes
-const WEEKDAY_BLUE = "#7dd3fc";
-const WEEKEND_YELLOW = "#fffa93";
-const INACTIVE_GRAY = "#d1d5db";
+const WEEKDAY_BLUE = "#7dd3fc"; // has data
+const WEEKEND_YELLOW = "#fffa93"; // no data
+const INACTIVE_GRAY = "#7dd3fc"; // future
 const GRID_COLOR = "#e5e7eb";
 
 // X-axis Tick
@@ -62,12 +62,13 @@ const getStartOfWeek = (date) => {
   return d;
 };
 
-// Check if same week
+// Check if date is in week
 const isDateInWeek = (date, weekStart) => {
   const start = new Date(weekStart);
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
   const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
   return d >= start && d <= end;
 };
 
@@ -80,6 +81,19 @@ const formatWeekRange = (startDate) => {
     "en-US",
     options
   )} – ${end.toLocaleDateString("en-US", options)}`;
+};
+
+// Convert UTC timestamp → Local date
+const convertUTCToLocal = (utcString) => {
+  const utc = new Date(utcString);
+  return new Date(
+    utc.getUTCFullYear(),
+    utc.getUTCMonth(),
+    utc.getUTCDate(),
+    utc.getUTCHours(),
+    utc.getUTCMinutes(),
+    utc.getUTCSeconds()
+  );
 };
 
 export default function WeeklyStatusChart() {
@@ -97,7 +111,6 @@ export default function WeeklyStatusChart() {
         const res = await axios.get(
           "https://attendance-backend-bqhw.vercel.app/attendance"
         );
-
         const attendanceData = res.data || [];
 
         if (!storedUsername) {
@@ -107,6 +120,7 @@ export default function WeeklyStatusChart() {
           return;
         }
 
+        // Filter by username and week
         const userData = attendanceData.filter(
           (entry) =>
             entry.username?.toLowerCase() === storedUsername?.toLowerCase() &&
@@ -114,6 +128,7 @@ export default function WeeklyStatusChart() {
             isDateInWeek(entry.startTime, weekStart)
         );
 
+        // Initialize week data
         const weekData = {
           Sun: { workedDuration: 0, breakCount: 0 },
           Mon: { workedDuration: 0, breakCount: 0 },
@@ -124,15 +139,16 @@ export default function WeeklyStatusChart() {
           Sat: { workedDuration: 0, breakCount: 0 },
         };
 
-        // Group entries by date
+        // Group entries by local date
         const groupedByDate = {};
         userData.forEach((entry) => {
-          const dateKey = new Date(entry.startTime).toDateString();
+          const localDate = convertUTCToLocal(entry.startTime);
+          const dateKey = localDate.toDateString();
           if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
           groupedByDate[dateKey].push(entry);
         });
 
-        // Sum worked hours and breaks per day
+        // Sum worked hours & breaks per day
         Object.keys(groupedByDate).forEach((dateKey) => {
           const entries = groupedByDate[dateKey];
           const totalWorkedSeconds = entries.reduce(
@@ -144,7 +160,7 @@ export default function WeeklyStatusChart() {
             0
           );
 
-          const localDate = new Date(entries[0].startTime);
+          const localDate = convertUTCToLocal(entries[0].startTime);
           const dayIndex = localDate.getDay(); // 0=Sun, 1=Mon, ...
           const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
           const weekday = weekdays[dayIndex];
@@ -187,7 +203,9 @@ export default function WeeklyStatusChart() {
     setWeekStart(newStart);
   };
 
+  // Normalize today's date
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   return (
     <div className="flex flex-col items-center justify-start h-full w-full py-8">
@@ -245,7 +263,6 @@ export default function WeeklyStatusChart() {
                 style={{ textAnchor: "middle", fill: "#6b7280", fontSize: 14 }}
               />
             </YAxis>
-
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: "14px" }} />
 
@@ -267,13 +284,18 @@ export default function WeeklyStatusChart() {
                 ].indexOf(entry.day);
                 const entryDate = new Date(weekStart);
                 entryDate.setDate(weekStart.getDate() + dayIndex);
+                entryDate.setHours(0, 0, 0, 0); // normalize
 
                 const isFuture = entryDate > today;
 
                 let fillColor;
-                if (isFuture) fillColor = INACTIVE_GRAY;
-                else if (entry.workedDuration === 0) fillColor = WEEKEND_YELLOW;
-                else fillColor = WEEKDAY_BLUE;
+                if (isFuture) {
+                  fillColor = INACTIVE_GRAY; // future day
+                } else if (entry.workedDuration > 0) {
+                  fillColor = WEEKDAY_BLUE; // has data → blue
+                } else {
+                  fillColor = WEEKEND_YELLOW; // no data → yellow
+                }
 
                 return <Cell key={index} fill={fillColor} />;
               })}
@@ -285,17 +307,12 @@ export default function WeeklyStatusChart() {
         <div className="flex justify-center items-center gap-6 mt-6 text-sm font-medium text-gray-700">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-[#7dd3fc] border" />
-            <span>Worked Days</span>
+            <span>Days with Data/Weekday</span>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-[#fffa93] border" />
-            <span>Non-working / Weekend</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-[#d1d5db] border" />
-            <span>Future Days</span>
+            <span>No Data / Weekend</span>
           </div>
         </div>
       </div>
