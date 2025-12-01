@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios";
 
-const API = "http://localhost:8000/attendance";
+const API = "https://attendance-backend-bqhw.vercel.app/attendance";
 const JSON_HEADERS = { headers: { "Content-Type": "application/json" } };
 
 export const useAttendanceStore = create(
