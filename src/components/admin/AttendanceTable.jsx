@@ -13,6 +13,14 @@ export default function AttendanceTable({
     return `${hours.toFixed(2)} hrs`;
   };
 
+  // ✅ Convert UTC → IST for display
+  const toIST = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">
@@ -64,12 +72,16 @@ export default function AttendanceTable({
             {data.map((r) => (
               <tr key={r.id} className="hover:bg-blue-50">
                 <td className="p-3 border border-gray-200">{r.id}</td>
+
+                {/* ✅ Convert to IST */}
                 <td className="p-3 border border-gray-200">
-                  {new Date(r.startTime).toLocaleString()}
+                  {toIST(r.startTime)}
                 </td>
+
                 <td className="p-3 border border-gray-200">
-                  {new Date(r.endTime).toLocaleString()}
+                  {toIST(r.endTime)}
                 </td>
+
                 <td className="p-3 border border-gray-200">
                   {formatToHours(r.workedDuration)}
                 </td>

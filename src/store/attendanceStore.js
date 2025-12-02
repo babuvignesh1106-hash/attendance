@@ -2,17 +2,40 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API = "https://attendance-backend-bqhw.vercel.app/attendance"; // adjust if deployed
+const API = "https://attendance-backend-bqhw.vercel.app/attendance";
 const JSON_HEADERS = { headers: { "Content-Type": "application/json" } };
 
 let _interval = null;
 
-// Helper: format milliseconds into hh:mm:ss
+/* --------------------------------------
+   ALWAYS GET IST TIME IN MILLISECONDS
+-----------------------------------------*/
+const getISTMs = () => {
+  const nowIST = new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Kolkata",
+  });
+  return new Date(nowIST).getTime();
+};
+
+/* --------------------------------------
+   Convert UTC → IST → milliseconds
+-----------------------------------------*/
+const utcToISTMs = (utcStr) => {
+  if (!utcStr) return null;
+  const ist = new Date(utcStr).toLocaleString("en-US", {
+    timeZone: "Asia/Kolkata",
+  });
+  return new Date(ist).getTime();
+};
+
+/* --------------------------------------
+   Format hh:mm:ss
+-----------------------------------------*/
 const formatMs = (ms = 0) => {
-  const totalSec = Math.floor(ms / 1000);
-  const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
-  const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
-  const s = String(totalSec % 60).padStart(2, "0");
+  const total = Math.floor(ms / 1000);
+  const h = String(Math.floor(total / 3600)).padStart(2, "0");
+  const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
+  const s = String(total % 60).padStart(2, "0");
   return `${h}:${m}:${s}`;
 };
 
@@ -22,28 +45,33 @@ export const useAttendanceStore = create((set, get) => ({
   // STATE
   isCheckedIn: false,
   isOnBreak: false,
-  startTime: null, // timestamp in ms
-  elapsedTime: 0, // milliseconds
-  breakStart: null, // timestamp in ms for current break
-  breakElapsed: 0, // total break duration in ms
+  startTime: null, // IST ms
+  elapsedTime: 0,
+  breakStart: null, // IST ms
+  breakElapsed: 0, // ms
   breakCount: 0,
 
-  // ---------------------------
-  // INTERNAL TIMER
-  // ---------------------------
+  /* --------------------------------------
+        TIMER ENGINE
+  -----------------------------------------*/
   _startTimer: () => {
-    get()._stopTimer(); // ensure no duplicate intervals
+    get()._stopTimer();
+
     if (!get().startTime) return;
 
     _interval = setInterval(() => {
-      const now = Date.now();
-      let worked = now - get().startTime - get().breakElapsed;
+      const now = getISTMs();
+      const state = get();
 
-      if (get().isOnBreak && get().breakStart) {
-        worked -= now - get().breakStart;
+      let worked = now - state.startTime - state.breakElapsed;
+
+      if (state.isOnBreak && state.breakStart) {
+        worked -= now - state.breakStart;
       }
 
-      set({ elapsedTime: worked >= 0 ? worked : 0 });
+      if (worked < 0) worked = 0;
+
+      set({ elapsedTime: worked });
     }, 1000);
   },
 
@@ -54,11 +82,12 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  // ---------------------------
-  // CHECK-IN
-  // ---------------------------
+  /* --------------------------------------
+        CHECK-IN
+  -----------------------------------------*/
   checkIn: async () => {
     const username = get().username;
+
     try {
       const res = await axios.post(
         `${API}/check-in`,
@@ -67,13 +96,11 @@ export const useAttendanceStore = create((set, get) => ({
       );
       const data = res.data;
 
-      const startMs = new Date(data.startTime).getTime();
-
       set({
         isCheckedIn: true,
-        startTime: startMs,
-        breakCount: data.breakCount || 0,
+        startTime: utcToISTMs(data.startTime),
         breakElapsed: (data.totalBreakDuration || 0) * 1000,
+        breakCount: data.breakCount || 0,
         isOnBreak: false,
         breakStart: null,
         elapsedTime: 0,
@@ -82,15 +109,16 @@ export const useAttendanceStore = create((set, get) => ({
       get()._startTimer();
     } catch (err) {
       console.error("CHECK-IN ERROR:", err);
-      if (err.response?.data?.message) alert(err.response.data.message);
+      alert(err.response?.data?.message || "Check-in failed");
     }
   },
 
-  // ---------------------------
-  // BREAK HANDLERS
-  // ---------------------------
+  /* --------------------------------------
+        START BREAK
+  -----------------------------------------*/
   startBreak: async () => {
     const username = get().username;
+
     try {
       const res = await axios.post(
         `${API}/start-break`,
@@ -99,23 +127,24 @@ export const useAttendanceStore = create((set, get) => ({
       );
       const data = res.data;
 
-      get()._stopTimer(); // pause main timer
+      get()._stopTimer();
 
       set({
         isOnBreak: true,
-        breakStart: new Date(data.currentBreakStart).getTime(),
+        breakStart: utcToISTMs(data.currentBreakStart),
         breakCount: data.breakCount,
       });
     } catch (err) {
       console.error("START BREAK ERROR:", err);
-      if (err.response?.data?.message) alert(err.response.data.message);
+      alert(err.response?.data?.message || "Start break failed");
     }
   },
 
+  /* --------------------------------------
+        END BREAK
+  -----------------------------------------*/
   endBreak: async () => {
     const username = get().username;
-    const bstart = get().breakStart;
-    if (!bstart) return;
 
     try {
       const res = await axios.post(
@@ -131,10 +160,10 @@ export const useAttendanceStore = create((set, get) => ({
         breakElapsed: (data.totalBreakDuration || 0) * 1000,
       });
 
-      get()._startTimer(); // resume timer
+      get()._startTimer();
     } catch (err) {
       console.error("END BREAK ERROR:", err);
-      if (err.response?.data?.message) alert(err.response.data.message);
+      alert(err.response?.data?.message || "End break failed");
     }
   },
 
@@ -143,15 +172,17 @@ export const useAttendanceStore = create((set, get) => ({
     else await get().startBreak();
   },
 
-  // ---------------------------
-  // CHECK-OUT
-  // ---------------------------
+  /* --------------------------------------
+        CHECK-OUT
+  -----------------------------------------*/
   checkOut: async () => {
     const username = get().username;
+
     try {
       await axios.post(`${API}/check-out`, { username }, JSON_HEADERS);
 
       get()._stopTimer();
+
       set({
         isCheckedIn: false,
         isOnBreak: false,
@@ -163,36 +194,32 @@ export const useAttendanceStore = create((set, get) => ({
       });
     } catch (err) {
       console.error("CHECK-OUT ERROR:", err);
-      if (err.response?.data?.message) alert(err.response.data.message);
+      alert(err.response?.data?.message || "Checkout failed");
     }
   },
 
-  // ---------------------------
-  // RESUME SESSION FROM BACKEND
-  // ---------------------------
+  /* --------------------------------------
+        RESUME (AFTER REFRESH)
+  -----------------------------------------*/
   resumeFromBackend: async () => {
     const username = get().username;
+
     try {
       const res = await axios.get(`${API}`);
-      const data = Array.isArray(res.data) ? res.data : res.data.records || [];
-      const todayOpen = data.find((r) => r.username === username && !r.endTime);
+      const list = Array.isArray(res.data) ? res.data : res.data.records;
 
-      if (!todayOpen) return;
-
-      const startMs = new Date(todayOpen.startTime).getTime();
-      const breakElapsed = (todayOpen.totalBreakDuration || 0) * 1000;
-      const onBreak = todayOpen.currentBreakStart != null;
-      const breakStartMs = onBreak
-        ? new Date(todayOpen.currentBreakStart).getTime()
-        : null;
+      const open = list.find((r) => r.username === username && !r.endTime);
+      if (!open) return;
 
       set({
         isCheckedIn: true,
-        startTime: startMs,
-        breakCount: todayOpen.breakCount || 0,
-        breakElapsed,
-        isOnBreak: onBreak,
-        breakStart: breakStartMs,
+        startTime: utcToISTMs(open.startTime),
+        breakElapsed: (open.totalBreakDuration || 0) * 1000,
+        breakCount: open.breakCount || 0,
+        isOnBreak: !!open.currentBreakStart,
+        breakStart: open.currentBreakStart
+          ? utcToISTMs(open.currentBreakStart)
+          : null,
       });
 
       get()._startTimer();
@@ -203,9 +230,9 @@ export const useAttendanceStore = create((set, get) => ({
 
   resumeTimer: async () => get().resumeFromBackend(),
 
-  // ---------------------------
-  // RESET LOCAL STATE
-  // ---------------------------
+  /* --------------------------------------
+        RESET LOCAL
+  -----------------------------------------*/
   resetLocal: () => {
     get()._stopTimer();
     set({
@@ -219,8 +246,8 @@ export const useAttendanceStore = create((set, get) => ({
     });
   },
 
-  // ---------------------------
-  // FORMATTER
-  // ---------------------------
+  /* --------------------------------------
+        FORMATTERS
+  -----------------------------------------*/
   formatElapsed: (ms) => formatMs(ms),
 }));
