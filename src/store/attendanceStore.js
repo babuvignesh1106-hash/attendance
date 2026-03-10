@@ -3,13 +3,24 @@ import { create } from "zustand";
 import axios from "axios";
 
 const API = "https://attendance-backend-bqhw.vercel.app/attendance";
-const JSON_HEADERS = { headers: { "Content-Type": "application/json" } };
+
+const JSON_HEADERS = {
+  headers: { "Content-Type": "application/json" },
+};
 
 let _interval = null;
 
-/* --------------------------------------
-   ALWAYS GET IST TIME IN MILLISECONDS
------------------------------------------*/
+/* ---------------------------------------
+   GET USER FROM LOCAL STORAGE
+---------------------------------------*/
+const getUser = () => {
+  const name = localStorage.getItem("name");
+  return name || "unknown-user";
+};
+
+/* ---------------------------------------
+   ALWAYS GET IST TIME
+---------------------------------------*/
 const getISTMs = () => {
   const nowIST = new Date().toLocaleString("en-US", {
     timeZone: "Asia/Kolkata",
@@ -17,43 +28,52 @@ const getISTMs = () => {
   return new Date(nowIST).getTime();
 };
 
-/* --------------------------------------
-   Convert UTC → IST → milliseconds
------------------------------------------*/
+/* ---------------------------------------
+   UTC → IST → ms
+---------------------------------------*/
 const utcToISTMs = (utcStr) => {
   if (!utcStr) return null;
+
   const ist = new Date(utcStr).toLocaleString("en-US", {
     timeZone: "Asia/Kolkata",
   });
+
   return new Date(ist).getTime();
 };
 
-/* --------------------------------------
-   Format hh:mm:ss
------------------------------------------*/
+/* ---------------------------------------
+   FORMAT TIME
+---------------------------------------*/
 const formatMs = (ms = 0) => {
   const total = Math.floor(ms / 1000);
+
   const h = String(Math.floor(total / 3600)).padStart(2, "0");
   const m = String(Math.floor((total % 3600) / 60)).padStart(2, "0");
   const s = String(total % 60).padStart(2, "0");
+
   return `${h}:${m}:${s}`;
 };
 
 export const useAttendanceStore = create((set, get) => ({
-  username: localStorage.getItem("name") || "user-no-name",
+  username: getUser(),
 
-  // STATE
+  /* ---------------------------------------
+      STATE
+  ---------------------------------------*/
+
   isCheckedIn: false,
   isOnBreak: false,
-  startTime: null, // IST ms
+  startTime: null,
   elapsedTime: 0,
-  breakStart: null, // IST ms
-  breakElapsed: 0, // ms
+
+  breakStart: null,
+  breakElapsed: 0,
   breakCount: 0,
 
-  /* --------------------------------------
-        TIMER ENGINE
-  -----------------------------------------*/
+  /* ---------------------------------------
+      TIMER ENGINE
+  ---------------------------------------*/
+
   _startTimer: () => {
     get()._stopTimer();
 
@@ -82,21 +102,24 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  /* --------------------------------------
-        CHECK-IN
-  -----------------------------------------*/
+  /* ---------------------------------------
+      CHECK IN
+  ---------------------------------------*/
+
   checkIn: async () => {
-    const username = get().username;
+    const username = getUser();
 
     try {
       const res = await axios.post(
-        `${API}/check-in`,
+        `${API}/check-in`, // ✅ FIXED
         { username },
-        JSON_HEADERS
+        JSON_HEADERS,
       );
+
       const data = res.data;
 
       set({
+        username,
         isCheckedIn: true,
         startTime: utcToISTMs(data.startTime),
         breakElapsed: (data.totalBreakDuration || 0) * 1000,
@@ -113,9 +136,10 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  /* --------------------------------------
-        START BREAK
-  -----------------------------------------*/
+  /* ---------------------------------------
+      START BREAK
+  ---------------------------------------*/
+
   startBreak: async () => {
     const username = get().username;
 
@@ -123,8 +147,9 @@ export const useAttendanceStore = create((set, get) => ({
       const res = await axios.post(
         `${API}/start-break`,
         { username },
-        JSON_HEADERS
+        JSON_HEADERS,
       );
+
       const data = res.data;
 
       get()._stopTimer();
@@ -140,9 +165,10 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  /* --------------------------------------
-        END BREAK
-  -----------------------------------------*/
+  /* ---------------------------------------
+      END BREAK
+  ---------------------------------------*/
+
   endBreak: async () => {
     const username = get().username;
 
@@ -150,8 +176,9 @@ export const useAttendanceStore = create((set, get) => ({
       const res = await axios.post(
         `${API}/end-break`,
         { username },
-        JSON_HEADERS
+        JSON_HEADERS,
       );
+
       const data = res.data;
 
       set({
@@ -168,18 +195,26 @@ export const useAttendanceStore = create((set, get) => ({
   },
 
   toggleBreak: async () => {
-    if (get().isOnBreak) await get().endBreak();
-    else await get().startBreak();
+    if (get().isOnBreak) {
+      await get().endBreak();
+    } else {
+      await get().startBreak();
+    }
   },
 
-  /* --------------------------------------
-        CHECK-OUT
-  -----------------------------------------*/
+  /* ---------------------------------------
+      CHECK OUT
+  ---------------------------------------*/
+
   checkOut: async () => {
     const username = get().username;
 
     try {
-      await axios.post(`${API}/check-out`, { username }, JSON_HEADERS);
+      await axios.post(
+        `${API}/check-out`, // ✅ FIXED
+        { username },
+        JSON_HEADERS,
+      );
 
       get()._stopTimer();
 
@@ -198,20 +233,24 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  /* --------------------------------------
-        RESUME (AFTER REFRESH)
-  -----------------------------------------*/
+  /* ---------------------------------------
+      RESUME SESSION AFTER REFRESH
+  ---------------------------------------*/
+
   resumeFromBackend: async () => {
-    const username = get().username;
+    const username = getUser();
 
     try {
       const res = await axios.get(`${API}`);
+
       const list = Array.isArray(res.data) ? res.data : res.data.records;
 
       const open = list.find((r) => r.username === username && !r.endTime);
+
       if (!open) return;
 
       set({
+        username,
         isCheckedIn: true,
         startTime: utcToISTMs(open.startTime),
         breakElapsed: (open.totalBreakDuration || 0) * 1000,
@@ -228,13 +267,17 @@ export const useAttendanceStore = create((set, get) => ({
     }
   },
 
-  resumeTimer: async () => get().resumeFromBackend(),
+  resumeTimer: async () => {
+    await get().resumeFromBackend();
+  },
 
-  /* --------------------------------------
-        RESET LOCAL
-  -----------------------------------------*/
+  /* ---------------------------------------
+      RESET LOCAL
+  ---------------------------------------*/
+
   resetLocal: () => {
     get()._stopTimer();
+
     set({
       isCheckedIn: false,
       isOnBreak: false,
@@ -246,8 +289,9 @@ export const useAttendanceStore = create((set, get) => ({
     });
   },
 
-  /* --------------------------------------
-        FORMATTERS
-  -----------------------------------------*/
+  /* ---------------------------------------
+      FORMATTERS
+  ---------------------------------------*/
+
   formatElapsed: (ms) => formatMs(ms),
 }));

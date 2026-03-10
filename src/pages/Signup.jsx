@@ -7,6 +7,7 @@ import DialogBox from "../pages/Login/DialogBox";
 
 export default function Signup() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     Name: "",
     Email: "",
@@ -14,6 +15,7 @@ export default function Signup() {
     Role: "",
     Designation: "",
     EmployeeId: "",
+    DateOfJoining: "", // ✅ added
   });
 
   const [dialog, setDialog] = useState({ isOpen: false, message: "" });
@@ -34,7 +36,8 @@ export default function Signup() {
           role: data.Role,
           designation: data.Designation,
           employeeId: data.EmployeeId,
-        }
+          dateOfJoining: data.DateOfJoining, // ✅ send to backend
+        },
       );
       return res.data;
     },
@@ -69,6 +72,7 @@ export default function Signup() {
         handleSubmit={handleSubmit}
         formData={formData}
       />
+
       <DialogBox
         isOpen={dialog.isOpen}
         message={dialog.message}

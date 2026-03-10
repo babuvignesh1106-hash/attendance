@@ -46,41 +46,24 @@ export default function LeaveRequestForm({ setActivePage }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !formData.name ||
-      !formData.leaveType ||
-      !formData.fromDate ||
-      !formData.toDate ||
-      !formData.reason
-    ) {
-      setErrorMessage("Please fill all required fields before submitting.");
-      return;
-    }
-
     try {
-      await axios.post(
+      const response = await axios.post(
         "https://attendance-backend-bqhw.vercel.app/leaves",
-        formData
+        formData,
       );
+
+      console.log("Response:", response.data);
 
       setShowSuccess(true);
       setErrorMessage("");
-
-      setTimeout(() => setShowSuccess(false), 4000);
-
-      setFormData({
-        name: localStorage.getItem("name") || "",
-        leaveType: "",
-        fromDate: "",
-        toDate: "",
-        reason: "",
-      });
-      setTotalDays(0);
-
-      handleBalanceClick();
     } catch (error) {
-      console.error("Error submitting leave:", error);
-      setErrorMessage("Error submitting leave request. Please try again.");
+      console.error("Full Error:", error);
+
+      if (error.response) {
+        setErrorMessage(error.response.data.message || "Server error");
+      } else {
+        setErrorMessage("Network error");
+      }
     }
   };
 
@@ -92,7 +75,7 @@ export default function LeaveRequestForm({ setActivePage }) {
       if (!name) throw new Error("User name not found in localStorage");
 
       const response = await axios.get(
-        `https://attendance-backend-bqhw.vercel.app/leaves/balance/${name}`
+        `https://attendance-backend-bqhw.vercel.app/leaves/balance/${name}`,
       );
       setBalanceData(response.data);
     } catch (error) {

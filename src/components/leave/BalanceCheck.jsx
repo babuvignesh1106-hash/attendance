@@ -3,23 +3,31 @@ import axios from "axios";
 import { ROUTES } from "../../constants/routes";
 
 export default function BalanceCheck({ setActivePage }) {
-  const username = localStorage.getItem("name"); // get name from localStorage
+  const username = localStorage.getItem("name");
   const [balanceData, setBalanceData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBalance = async () => {
       try {
         const res = await axios.get(
-          `https://attendance-backend-bqhw.vercel.app/leaves/balance/${username}`
+          `https://attendance-backend-bqhw.vercel.app/leaves/balance/${username}`,
         );
+
+        console.log("Balance API Response:", res.data);
+
         setBalanceData(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching balance:", err);
         setBalanceData(null);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (username) fetchBalance();
+    if (username) {
+      fetchBalance();
+    }
   }, [username]);
 
   const leaveTypes = [
@@ -29,9 +37,17 @@ export default function BalanceCheck({ setActivePage }) {
     "maternityLeave",
   ];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Loading leave balance...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-100 p-4 pt-8">
-      {/* Back Button at the Top */}
+      {/* Back Button */}
       <div className="w-full max-w-md mb-6">
         <button
           type="button"
@@ -48,19 +64,20 @@ export default function BalanceCheck({ setActivePage }) {
           Leave Balance - {username}
         </h2>
 
-        <div className="grid grid-cols-2 gap-4 text-left">
+        <div className="grid grid-cols-2 gap-4">
           {leaveTypes.map((type) => (
             <div
               key={type}
-              className="bg-green-100 p-4 rounded-xl flex flex-col items-center justify-center"
+              className="bg-green-100 p-4 rounded-xl flex flex-col items-center"
             >
               <h3 className="font-semibold text-gray-700">
                 {type
                   .replace(/([A-Z])/g, " $1")
                   .replace(/^./, (str) => str.toUpperCase())}
               </h3>
+
               <span className="text-xl font-bold text-green-700">
-                {balanceData ? balanceData[type] : 0}
+                {balanceData?.[type] ?? 0}
               </span>
             </div>
           ))}
