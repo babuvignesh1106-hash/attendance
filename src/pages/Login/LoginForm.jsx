@@ -63,6 +63,9 @@ export default function LoginForm({ handleChange, handleSubmit, formData }) {
         >
           Sign In
         </button>
+        <p className="text-right text-sm text-blue-500 cursor-pointer">
+          <a href="/forgot-password">Forgot Password?</a>
+        </p>
       </form>
     </div>
   );

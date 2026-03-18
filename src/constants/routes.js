@@ -38,4 +38,6 @@ export const ROUTES = {
   NEW_EMP_PAY: "/new-emp-pay",
   UNAUTHORIZED: "/unauthorized",
   NOTFOUND: "/notfound",
+  FORGETPASSWORD: "/forgot-password",
+  RESETPASSWORD: "/reset-password",
 };

@@ -31,6 +31,8 @@ import PayRoll from "../components/payslip/PayRoll";
 import StaffDasboard from "../components/staff/StaffDasboard";
 import Unauthorized from "../pages/Unauthorized";
 import NotFound from "../pages/NotFound"; // ⭐ ADD THIS
+import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword/ResetPassword";
 
 export default function AppRouter() {
   return (
@@ -39,6 +41,8 @@ export default function AppRouter() {
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path={ROUTES.SIGNUP} element={<Signup />} />
+        <Route path={ROUTES.FORGETPASSWORD} element={<ForgotPassword />} />
+        <Route path={ROUTES.RESETPASSWORD} element={<ResetPassword />} />
         <Route path={ROUTES.UNAUTHORIZED} element={<Unauthorized />} />
 
         {/* Protected Routes */}
