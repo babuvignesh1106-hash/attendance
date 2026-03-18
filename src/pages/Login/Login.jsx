@@ -24,7 +24,7 @@ export default function Login() {
         {
           email: data.Email,
           password: data.Password,
-        }
+        },
       );
       return res.data; // { access_token, user: { ... } }
     },

@@ -48,11 +48,16 @@ export default function Signup() {
       });
       setTimeout(() => navigate("/"), 1200);
     },
-    onError: () =>
+    onError: (error) => {
+      console.log("ERROR 👉", error.response?.data);
+
       setDialog({
         isOpen: true,
-        message: "❌ Signup failed. Please try again.",
-      }),
+        message:
+          error.response?.data?.message ||
+          "❌ Signup failed. Please try again.",
+      });
+    },
   });
 
   const handleChange = (e) => {

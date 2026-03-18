@@ -35,7 +35,7 @@ const ResetPassword = () => {
       console.log("SENDING TOKEN:", token); // 🔍 debug
 
       const res = await axios.post(
-        "http://localhost:8000/auth/reset-password",
+        "https://attendance-snowy-alpha.vercel.app/auth/reset-password",
         {
           token,
           password,
