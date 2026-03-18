@@ -20,7 +20,7 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: async (data) => {
       const res = await axios.post(
-        "https://attendance-snowy-alpha.vercel.app/auth/login", // 🔁 Use your local backend for testing
+        "https://attendance-backend-bqhw.vercel.app/auth/login", // 🔁 Use your local backend for testing
         {
           email: data.Email,
           password: data.Password,
