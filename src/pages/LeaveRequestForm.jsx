@@ -11,12 +11,22 @@ export default function LeaveRequestForm({ setActivePage }) {
     toDate: "",
     reason: "",
   });
-
   const [totalDays, setTotalDays] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [balanceData, setBalanceData] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
   const navigate = useNavigate();
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const maxLeaves = {
+    "Sick Leave": 6,
+    "Personal Leave": 6,
+    "Earned Leave": 12,
+    "Maternity Leave": Infinity, // you can adjust
+  };
 
   useEffect(() => {
     const storedName = localStorage.getItem("name");
@@ -40,47 +50,91 @@ export default function LeaveRequestForm({ setActivePage }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrorMessage(""); // clear error when user starts typing
+    setErrorMessage("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const name = localStorage.getItem("name");
+    if (!name) {
+      setErrorMessage("User not found");
+      return;
+    }
+
+    if (!formData.leaveType) {
+      setDialogMessage("Please select a leave type.");
+      setShowDialog(true);
+      return;
+    }
+
+    if (totalDays <= 0) {
+      setDialogMessage("Invalid leave dates.");
+      setShowDialog(true);
+      return;
+    }
+
     try {
-      const response = await axios.post(
+      // Fetch current leave balance
+      const balanceRes = await axios.get(
+        `https://attendance-backend-sandy.vercel.app/leaves/balance/${name}`,
+      );
+      const balance = balanceRes.data; // { sickLeave: 2, personalLeave: 1, earnedLeave: 5 }
+
+      // Map leave type to balance key
+      const leaveMap = {
+        "Sick Leave": "sickLeave",
+        "Personal Leave": "personalLeave",
+        "Earned Leave": "earnedLeave",
+        "Maternity Leave": "maternityLeave",
+      };
+      const key = leaveMap[formData.leaveType];
+
+      const availableBalance = balance[key] ?? 0;
+      const maxAllowed = maxLeaves[formData.leaveType];
+
+      // Check requested days
+      if (totalDays > availableBalance) {
+        setDialogMessage(
+          `❌ You only have ${availableBalance} ${formData.leaveType} days left. Requested ${totalDays} days.`,
+        );
+        setShowDialog(true);
+        return;
+      }
+
+      if (totalDays > maxAllowed) {
+        setDialogMessage(
+          `❌ Maximum allowed ${formData.leaveType} days are ${maxAllowed}. Requested ${totalDays} days.`,
+        );
+        setShowDialog(true);
+        return;
+      }
+
+      // Submit leave request
+      await axios.post(
         "https://attendance-backend-sandy.vercel.app/leaves",
         formData,
       );
 
-      console.log("Response:", response.data);
-
+      // Success
       setShowSuccess(true);
       setErrorMessage("");
+      setBalanceData(balance);
+
+      // Reset form
+      setFormData({
+        name: name,
+        leaveType: "",
+        fromDate: "",
+        toDate: "",
+        reason: "",
+      });
+      setTotalDays(0);
     } catch (error) {
-      console.error("Full Error:", error);
-
-      if (error.response) {
-        setErrorMessage(error.response.data.message || "Server error");
-      } else {
-        setErrorMessage("Network error");
-      }
-    }
-  };
-
-  const today = new Date().toISOString().split("T")[0];
-
-  const handleBalanceClick = async () => {
-    try {
-      const name = localStorage.getItem("name");
-      if (!name) throw new Error("User name not found in localStorage");
-
-      const response = await axios.get(
-        `https://attendance-backend-sandy.vercel.app/leaves/balance/${name}`,
+      console.error("Error submitting leave:", error);
+      setErrorMessage(
+        error.response?.data?.message || "Network or server error",
       );
-      setBalanceData(response.data);
-    } catch (error) {
-      console.error("Error fetching balance:", error);
-      setBalanceData({ error: "Failed to load balance" });
     }
   };
 
@@ -210,6 +264,21 @@ export default function LeaveRequestForm({ setActivePage }) {
           </button>
         </form>
       </div>
+
+      {/* Dialog for zero or exceeded balance */}
+      {showDialog && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-blue-300 rounded-xl p-6 w-80 text-center shadow-lg">
+            <p className="text-red-600 font-semibold mb-4">{dialogMessage}</p>
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
+              onClick={() => setShowDialog(false)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
