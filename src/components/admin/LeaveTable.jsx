@@ -14,7 +14,7 @@ export default function LeaveTable({ onBack }) {
     const fetchLeaves = async () => {
       try {
         const response = await axios.get(
-          "https://attendance-backend-bqhw.vercel.app/leaves"
+          "https://attendance-backend-sandy.vercel.app/leaves",
         );
         setLeaveData(response.data);
       } catch (error) {
@@ -34,7 +34,7 @@ export default function LeaveTable({ onBack }) {
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
+    currentPage * rowsPerPage,
   );
 
   const exportToExcel = () => {
@@ -52,7 +52,7 @@ export default function LeaveTable({ onBack }) {
         Reason: leave.reason,
         Status: leave.status,
         "Submitted At": new Date(leave.submittedAt).toLocaleString(),
-      }))
+      })),
     );
 
     const workbook = XLSX.utils.book_new();
@@ -78,17 +78,17 @@ export default function LeaveTable({ onBack }) {
   const handleSave = async () => {
     try {
       await axios.put(
-        `https://attendance-backend-bqhw.vercel.app/leaves/${editingLeave.id}`,
+        `https://attendance-backend-sandy.vercel.app/leaves/${editingLeave.id}`,
         {
           status: editingLeave.status,
-        }
+        },
       );
       setLeaveData((prev) =>
         prev.map((leave) =>
           leave.id === editingLeave.id
             ? { ...leave, status: editingLeave.status }
-            : leave
-        )
+            : leave,
+        ),
       );
       setEditingLeave(null);
     } catch (error) {
@@ -172,8 +172,8 @@ export default function LeaveTable({ onBack }) {
                       leave.status === "Pending"
                         ? "text-yellow-600"
                         : leave.status === "Approved"
-                        ? "text-green-600"
-                        : "text-red-600"
+                          ? "text-green-600"
+                          : "text-red-600"
                     }`}
                   >
                     {leave.status}

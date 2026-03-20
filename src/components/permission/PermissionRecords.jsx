@@ -13,12 +13,12 @@ export default function PermissionRecords({ setActivePage }) {
     const fetchRecords = async () => {
       try {
         const res = await axios.get(
-          "https://attendance-backend-bqhw.vercel.app/permission"
+          "https://attendance-backend-sandy.vercel.app/permission",
         );
 
         // Filter only the logged-in user's records
         const filtered = res.data.filter(
-          (record) => record.name?.toLowerCase() === username?.toLowerCase()
+          (record) => record.name?.toLowerCase() === username?.toLowerCase(),
         );
         setRecords(filtered);
       } catch (err) {

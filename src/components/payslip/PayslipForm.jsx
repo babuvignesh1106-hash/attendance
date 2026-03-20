@@ -51,7 +51,7 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
     const fetchStaff = async () => {
       try {
         const res = await axios.get(
-          "https://attendance-backend-bqhw.vercel.app/staff"
+          "https://attendance-backend-bqhw.vercel.app/staff",
         );
         setStaffList(res.data);
       } catch (err) {
@@ -116,14 +116,14 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
 
       if (editData) {
         await axios.put(
-          `https://attendance-backend-bqhw.vercel.app/payslip/${editData.id}`,
-          payload
+          `https://attendance-backend-sandy.vercel.app/payslip/${editData.id}`,
+          payload,
         );
         setDialogMessage("Payslip updated successfully!");
       } else {
         await axios.post(
-          "https://attendance-backend-bqhw.vercel.app/payslip",
-          payload
+          "https://attendance-backend-sandy.vercel.app/payslip",
+          payload,
         );
         setDialogMessage("Payslip added successfully!");
       }
@@ -132,7 +132,7 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
     } catch (err) {
       console.error("Error:", err.response?.data || err.message);
       setDialogMessage(
-        "Failed: " + (err.response?.data?.message || err.message)
+        "Failed: " + (err.response?.data?.message || err.message),
       );
       setShowDialog(true);
     }

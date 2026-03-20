@@ -28,7 +28,7 @@ const convertUTCToLocalDate = (utcString) => {
     utc.getUTCDate(),
     utc.getUTCHours(),
     utc.getUTCMinutes(),
-    utc.getUTCSeconds()
+    utc.getUTCSeconds(),
   );
 };
 
@@ -48,7 +48,7 @@ export default function CalendarGrid() {
     setError(null);
 
     axios
-      .get("https://attendance-backend-bqhw.vercel.app/attendance")
+      .get("https://attendance-backend-sandy.vercel.app/attendance")
       .then((res) => {
         if (!Array.isArray(res.data)) {
           setAttendanceData([]);

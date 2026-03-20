@@ -11,7 +11,7 @@ export default function Approved({ setActivePage }) {
     const fetchLeaves = async () => {
       try {
         const res = await axios.get(
-          "https://attendance-backend-bqhw.vercel.app/leaves"
+          "https://attendance-backend-sandy.vercel.app/leaves",
         );
         const userLeaves = res.data.filter((leave) => leave.name === username);
         setLeaves(userLeaves);
@@ -89,8 +89,8 @@ export default function Approved({ setActivePage }) {
                       leave.status === "Approved"
                         ? "text-green-600"
                         : leave.status === "Rejected"
-                        ? "text-red-600"
-                        : "text-yellow-600"
+                          ? "text-red-600"
+                          : "text-yellow-600"
                     }`}
                   >
                     {leave.status}

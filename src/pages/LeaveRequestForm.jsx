@@ -48,7 +48,7 @@ export default function LeaveRequestForm({ setActivePage }) {
 
     try {
       const response = await axios.post(
-        "https://attendance-backend-bqhw.vercel.app/leaves",
+        "https://attendance-backend-sandy.vercel.app/leaves",
         formData,
       );
 
@@ -75,7 +75,7 @@ export default function LeaveRequestForm({ setActivePage }) {
       if (!name) throw new Error("User name not found in localStorage");
 
       const response = await axios.get(
-        `https://attendance-backend-bqhw.vercel.app/leaves/balance/${name}`,
+        `https://attendance-backend-sandy.vercel.app/leaves/balance/${name}`,
       );
       setBalanceData(response.data);
     } catch (error) {

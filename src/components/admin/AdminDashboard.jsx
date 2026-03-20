@@ -4,25 +4,28 @@ import * as XLSX from "xlsx";
 import AttendanceTable from "./AttendanceTable";
 import LeaveTable from "./LeaveTable";
 import PermissionTable from "./PermissionTable";
+import UsersTable from "./UsersTable"; // ✅ IMPORT THIS
 import { motion } from "framer-motion";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState(""); // "", "attendance", "leaves", "permission"
+  const [activeTab, setActiveTab] = useState("");
   const [attendanceData, setAttendanceData] = useState([]);
   const [leaveData, setLeaveData] = useState([]);
   const [permissionData, setPermissionData] = useState([]);
+  const [usersData, setUsersData] = useState([]); // ✅ NEW STATE
   const [selectedUser, setSelectedUser] = useState("All");
 
   useEffect(() => {
     if (activeTab === "attendance") fetchAttendance();
     if (activeTab === "leaves") fetchLeaves();
     if (activeTab === "permission") fetchPermissions();
+    if (activeTab === "users") fetchUsers(); // ✅ NEW
   }, [activeTab]);
 
   const fetchAttendance = async () => {
     try {
       const res = await axios.get(
-        "https://attendance-backend-bqhw.vercel.app/attendance"
+        "https://attendance-backend-sandy.vercel.app/attendance",
       );
       setAttendanceData(res.data);
     } catch (err) {
@@ -33,7 +36,7 @@ export default function AdminDashboard() {
   const fetchLeaves = async () => {
     try {
       const res = await axios.get(
-        "https://attendance-backend-bqhw.vercel.app/leaves"
+        "https://attendance-backend-sandy.vercel.app/leaves",
       );
       setLeaveData(res.data);
     } catch (err) {
@@ -44,7 +47,7 @@ export default function AdminDashboard() {
   const fetchPermissions = async () => {
     try {
       const res = await axios.get(
-        "https://attendance-backend-bqhw.vercel.app/permission"
+        "https://attendance-backend-sandy.vercel.app/permission",
       );
       setPermissionData(res.data);
     } catch (err) {
@@ -52,10 +55,30 @@ export default function AdminDashboard() {
     }
   };
 
+  // ✅ NEW FUNCTION
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem("token"); // ✅ get token
+
+      const res = await axios.get(
+        "https://attendance-backend-sandy.vercel.app/users",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ send token
+          },
+        },
+      );
+
+      setUsersData(res.data);
+    } catch (err) {
+      console.error("Error fetching users", err);
+    }
+  };
+
   const uniqueUsers = [
     "All",
     ...new Set(
-      attendanceData.map((d) => d.username).filter((u) => u && u.trim() !== "")
+      attendanceData.map((d) => d.username).filter((u) => u && u.trim() !== ""),
     ),
   ];
 
@@ -76,7 +99,6 @@ export default function AdminDashboard() {
     XLSX.writeFile(wb, fileName);
   };
 
-  // --- 🎨 Animated Dashboard Cards ---
   const cardVariants = {
     hidden: { opacity: 0, y: 40 },
     visible: (i) => ({
@@ -86,10 +108,10 @@ export default function AdminDashboard() {
     }),
   };
 
+  // ================= DASHBOARD =================
   if (activeTab === "")
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        {/* Background Blur Circles */}
         <div className="absolute top-10 left-10 w-56 h-56 bg-blue-300 rounded-full blur-3xl opacity-20 animate-pulse"></div>
         <div className="absolute bottom-10 right-10 w-64 h-64 bg-purple-300 rounded-full blur-3xl opacity-20 animate-pulse"></div>
 
@@ -122,6 +144,12 @@ export default function AdminDashboard() {
               color: "from-purple-500 to-pink-500",
               tab: "permission",
             },
+            {
+              title: "Users Table",
+              desc: "View all employee details.",
+              color: "from-orange-500 to-red-500",
+              tab: "users",
+            },
           ].map((card, i) => (
             <motion.div
               key={card.title}
@@ -135,7 +163,7 @@ export default function AdminDashboard() {
                 boxShadow: "0px 10px 25px rgba(0,0,0,0.15)",
               }}
               onClick={() => setActiveTab(card.tab)}
-              className={`bg-gradient-to-br ${card.color} text-white rounded-2xl shadow-lg p-10 text-center cursor-pointer transition-transform duration-300`}
+              className={`bg-gradient-to-br ${card.color} text-white rounded-2xl shadow-lg p-10 text-center cursor-pointer`}
             >
               <h3 className="text-2xl font-semibold mb-4">{card.title}</h3>
               <p className="text-white/90 text-sm">{card.desc}</p>
@@ -145,6 +173,7 @@ export default function AdminDashboard() {
       </div>
     );
 
+  // ================= TABS =================
   if (activeTab === "attendance")
     return (
       <AttendanceTable
@@ -164,4 +193,8 @@ export default function AdminDashboard() {
     return (
       <PermissionTable data={permissionData} onBack={() => setActiveTab("")} />
     );
+
+  // ✅ USERS TAB
+  if (activeTab === "users")
+    return <UsersTable data={usersData} onBack={() => setActiveTab("")} />;
 }

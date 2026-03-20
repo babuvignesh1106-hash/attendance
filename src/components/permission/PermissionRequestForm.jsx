@@ -46,8 +46,8 @@ export default function PermissionRequestForm({ setActivePage }) {
 
     try {
       await axios.post(
-        "https://attendance-backend-bqhw.vercel.app/permission",
-        formData
+        "https://attendance-backend-sandy.vercel.app/permission",
+        formData,
       );
       setShowSuccess(true);
 

@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API = "https://attendance-backend-bqhw.vercel.app/attendance";
+const API = "https://attendance-backend-sandy.vercel.app/attendance";
 
 const JSON_HEADERS = {
   headers: { "Content-Type": "application/json" },

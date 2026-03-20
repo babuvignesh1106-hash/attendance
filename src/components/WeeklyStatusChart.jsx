@@ -79,7 +79,7 @@ const formatWeekRange = (startDate) => {
   const options = { month: "short", day: "numeric" };
   return `${startDate.toLocaleDateString(
     "en-US",
-    options
+    options,
   )} – ${end.toLocaleDateString("en-US", options)}`;
 };
 
@@ -92,7 +92,7 @@ const convertUTCToLocal = (utcString) => {
     utc.getUTCDate(),
     utc.getUTCHours(),
     utc.getUTCMinutes(),
-    utc.getUTCSeconds()
+    utc.getUTCSeconds(),
   );
 };
 
@@ -109,7 +109,7 @@ export default function WeeklyStatusChart() {
 
       try {
         const res = await axios.get(
-          "https://attendance-backend-bqhw.vercel.app/attendance"
+          "https://attendance-backend-sandy.vercel.app/attendance",
         );
         const attendanceData = res.data || [];
 
@@ -125,7 +125,7 @@ export default function WeeklyStatusChart() {
           (entry) =>
             entry.username?.toLowerCase() === storedUsername?.toLowerCase() &&
             entry.startTime &&
-            isDateInWeek(entry.startTime, weekStart)
+            isDateInWeek(entry.startTime, weekStart),
         );
 
         // Initialize week data
@@ -153,11 +153,11 @@ export default function WeeklyStatusChart() {
           const entries = groupedByDate[dateKey];
           const totalWorkedSeconds = entries.reduce(
             (sum, e) => sum + (e.workedDuration || 0),
-            0
+            0,
           );
           const totalBreakCount = entries.reduce(
             (sum, e) => sum + (e.breakCount || 0),
-            0
+            0,
           );
 
           const localDate = convertUTCToLocal(entries[0].startTime);

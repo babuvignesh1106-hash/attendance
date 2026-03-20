@@ -33,7 +33,7 @@ const PayrollDashboard = ({ setActivePage }) => {
   const fetchPayslips = async () => {
     try {
       const res = await axios.get(
-        "https://attendance-backend-bqhw.vercel.app/payslip"
+        "https://attendance-backend-sandy.vercel.app/payslip",
       );
       setPayslips(res.data);
     } catch (err) {
@@ -61,7 +61,7 @@ const PayrollDashboard = ({ setActivePage }) => {
 
     try {
       await axios.delete(
-        `https://attendance-backend-bqhw.vercel.app/payslip/${id}`
+        `https://attendance-backend-sandy.vercel.app/payslip/${id}`,
       );
       fetchPayslips();
     } catch (err) {
@@ -74,7 +74,7 @@ const PayrollDashboard = ({ setActivePage }) => {
   const filteredPayslips = payslips.filter(
     (p) =>
       p.month.toLowerCase() === selectedMonth.toLowerCase() &&
-      p.year === selectedYear
+      p.year === selectedYear,
   );
 
   const years = [...new Set(payslips.map((p) => p.year))].sort((a, b) => b - a);
