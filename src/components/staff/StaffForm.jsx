@@ -21,7 +21,7 @@ export default function StaffForm({ setActivePage }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await fetch("https://attendance-backend-bqhw.vercel.app/staff", {
+      await fetch("https://attendance-backend-snvv.onrender.com/staff", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -97,7 +97,8 @@ export default function StaffForm({ setActivePage }) {
 
             <button
               onClick={() => (
-                setShowSuccess(false), setActivePage(ROUTES.STAFF_LIST)
+                setShowSuccess(false),
+                setActivePage(ROUTES.STAFF_LIST)
               )}
               className="bg-blue-600 text-white w-full py-2 rounded-lg"
             >

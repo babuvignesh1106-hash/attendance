@@ -35,13 +35,13 @@ export default function NewEmpPayroll() {
         }
 
         const res = await axios.get(
-          "https://attendance-backend-bqhw.vercel.app/paySlip"
+          "https://attendance-backend-snvv.onrender.com/paySlip",
         );
 
         const cleanStored = storedName.trim().toLowerCase();
 
         const matched = res.data.filter(
-          (p) => p.employeeName?.trim().toLowerCase() === cleanStored
+          (p) => p.employeeName?.trim().toLowerCase() === cleanStored,
         );
 
         setPayslips(matched);
@@ -91,7 +91,7 @@ export default function NewEmpPayroll() {
   const filteredPayslips = payslips.filter((p) => p.year === selectedYear);
 
   const selectedPayslip = filteredPayslips.find(
-    (p) => p.month.toLowerCase() === selectedMonth?.toLowerCase()
+    (p) => p.month.toLowerCase() === selectedMonth?.toLowerCase(),
   );
 
   return (
@@ -138,7 +138,7 @@ export default function NewEmpPayroll() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {months.map((month, i) => {
           const slip = filteredPayslips.find(
-            (p) => p.month.toLowerCase() === month.toLowerCase()
+            (p) => p.month.toLowerCase() === month.toLowerCase(),
           );
 
           const isLatest =

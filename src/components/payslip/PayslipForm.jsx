@@ -3,7 +3,7 @@ import axios from "axios";
 import { ROUTES } from "../../constants/routes";
 import { useNavigate } from "react-router-dom";
 
-// Reusable Success Dialog (same design as LogoutDialog)
+// ✅ Success Dialog
 function SuccessDialog({ message, onConfirm }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
@@ -13,7 +13,7 @@ function SuccessDialog({ message, onConfirm }) {
 
         <button
           onClick={onConfirm}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md w-full"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md w-full"
         >
           OK
         </button>
@@ -22,19 +22,22 @@ function SuccessDialog({ message, onConfirm }) {
   );
 }
 
-export default function PayslipForm({ onSuccess, editData, setActivePage }) {
+export default function PayslipForm({ editData, setActivePage }) {
   const navigate = useNavigate();
+
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
 
-  const [staffList, setStaffList] = useState([]);
+  const [allEmployees, setAllEmployees] = useState([]);
 
-  // Get current month/year
   const now = new Date();
   const currentMonth = now.toLocaleString("en-US", { month: "long" });
   const currentYear = now.getFullYear();
 
+  // ✅ FORM STATE
   const [form, setForm] = useState({
+    selectedEmployeeId: "",
+    employeeType: "", // ✅ staff or user
     employeeId: "",
     employeeName: "",
     designation: "",
@@ -46,25 +49,57 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
     year: currentYear,
   });
 
-  // Load staff
+  // ✅ FETCH DATA
   useEffect(() => {
-    const fetchStaff = async () => {
+    const fetchAllEmployees = async () => {
       try {
-        const res = await axios.get(
-          "https://attendance-backend-bqhw.vercel.app/staff",
-        );
-        setStaffList(res.data);
+        const [staffRes, usersRes] = await Promise.all([
+          axios.get("https://attendance-backend-snvv.onrender.com/staff"),
+          axios.get("https://attendance-backend-snvv.onrender.com/users"), // ⚠️ replace in production
+        ]);
+
+        console.log("STAFF:", staffRes.data);
+        console.log("USERS:", usersRes.data);
+
+        // ✅ STAFF
+        const staffData = staffRes.data.map((s) => ({
+          id: `staff-${s.id}`,
+          type: "staff",
+          employeeId: s.employeeId,
+          employeeName: `${s.employeeName} (Staff)`,
+          designation: s.designation,
+          salary: s.salary,
+          panCard: s.pancard || "",
+          dateOfJoining: s.dateOfJoining,
+        }));
+
+        // ✅ USERS
+        const usersData = usersRes.data.map((u) => ({
+          id: `user-${u.id}`,
+          type: "user",
+          employeeId: u.employeeId,
+          employeeName: `${u.name} (User)`,
+          designation: u.designation,
+          salary: "", // editable
+          panCard: "", // editable
+          dateOfJoining: u.dateOfJoining,
+        }));
+
+        setAllEmployees([...staffData, ...usersData]);
       } catch (err) {
-        console.error("Error fetching staff:", err);
+        console.error("Error fetching employees:", err);
       }
     };
-    fetchStaff();
+
+    fetchAllEmployees();
   }, []);
 
-  // Prefill edit data
+  // ✅ EDIT PREFILL
   useEffect(() => {
     if (editData) {
       setForm({
+        selectedEmployeeId: "",
+        employeeType: "",
         employeeId: editData.employeeId || "",
         employeeName: editData.employeeName || "",
         designation: editData.designation || "",
@@ -78,31 +113,34 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
     }
   }, [editData]);
 
-  // Handle normal input
+  // ✅ INPUT CHANGE
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // When selecting employee
+  // ✅ DROPDOWN SELECT
   const handleEmployeeChange = (e) => {
-    const empId = Number(e.target.value);
-    const selected = staffList.find((s) => s.id === empId);
+    const selectedId = e.target.value;
+
+    const selected = allEmployees.find((emp) => emp.id === selectedId);
 
     if (selected) {
       setForm((prev) => ({
         ...prev,
+        selectedEmployeeId: selectedId,
+        employeeType: selected.type,
         employeeId: selected.employeeId,
         employeeName: selected.employeeName,
         designation: selected.designation,
         salary: selected.salary,
-        panCard: selected.pancard,
+        panCard: selected.panCard,
         dateOfJoining: selected.dateOfJoining,
       }));
     }
   };
 
-  // Submit
+  // ✅ SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -138,7 +176,7 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
     }
   };
 
-  // When user clicks OK on success dialog → redirect
+  // ✅ DIALOG OK
   const handleDialogConfirm = () => {
     setShowDialog(false);
     navigate(ROUTES.PAYROLL_DASHBOARD);
@@ -146,7 +184,6 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
 
   return (
     <>
-      {/* Success Dialog */}
       {showDialog && (
         <SuccessDialog
           message={dialogMessage}
@@ -159,42 +196,43 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
           onSubmit={handleSubmit}
           className="w-full max-w-3xl bg-white p-8 rounded-3xl shadow-xl"
         >
+          {/* Back */}
           <button
             type="button"
             onClick={() => setActivePage(ROUTES.PAYROLL)}
-            className="flex-1 bg-gray-500 text-white px-5 py-3 rounded-xl hover:bg-gray-600 transition"
+            className="bg-gray-500 text-white px-5 py-3 rounded-xl mb-4"
           >
             Back
           </button>
+
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
             {editData ? "Edit Payslip" : "Add Payslip"}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Employee Dropdown */}
+            {/* Dropdown */}
             <div className="md:col-span-2">
               <label className="block mb-2 text-gray-600">
                 Employee Name <span className="text-red-500">*</span>
               </label>
+
               <select
-                value={
-                  staffList.find((s) => s.employeeName === form.employeeName)
-                    ?.id || ""
-                }
+                value={form.selectedEmployeeId}
                 onChange={handleEmployeeChange}
                 className="w-full p-3 border border-gray-300 rounded-xl"
                 required
               >
                 <option value="">Select Employee</option>
-                {staffList.map((staff) => (
-                  <option key={staff.id} value={staff.id}>
-                    {staff.employeeName}
+
+                {allEmployees.map((emp) => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.employeeName}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Other Fields */}
+            {/* Fields */}
             {[
               { name: "employeeId", label: "Employee ID" },
               { name: "designation", label: "Designation" },
@@ -204,45 +242,47 @@ export default function PayslipForm({ onSuccess, editData, setActivePage }) {
               { name: "bonus", label: "Bonus", type: "number", optional: true },
               { name: "month", label: "Month" },
               { name: "year", label: "Year", type: "number" },
-            ].map((field) => (
-              <div key={field.name}>
-                <label className="block mb-2 text-gray-600">
-                  {field.label}{" "}
-                  {!field.optional && <span className="text-red-500">*</span>}
-                </label>
+            ].map((field) => {
+              const isReadOnly =
+                ["employeeId", "designation", "dateOfJoining"].includes(
+                  field.name,
+                ) ||
+                (["salary", "panCard"].includes(field.name) &&
+                  form.employeeType === "staff");
 
-                <input
-                  type={field.type || "text"}
-                  name={field.name}
-                  value={form[field.name]}
-                  onChange={handleChange}
-                  required={!field.optional}
-                  className={`w-full p-3 border border-gray-300 rounded-xl ${
-                    [
-                      "employeeId",
-                      "designation",
-                      "salary",
-                      "panCard",
-                      "dateOfJoining",
-                    ].includes(field.name)
-                      ? "bg-gray-100 cursor-not-allowed"
-                      : ""
-                  }`}
-                  readOnly={[
-                    "employeeId",
-                    "designation",
-                    "salary",
-                    "panCard",
-                    "dateOfJoining",
-                  ].includes(field.name)}
-                />
-              </div>
-            ))}
+              return (
+                <div key={field.name}>
+                  <label className="block mb-2 text-gray-600">
+                    {field.label}{" "}
+                    {!field.optional && <span className="text-red-500">*</span>}
+                  </label>
+
+                  <input
+                    type={field.type || "text"}
+                    name={field.name}
+                    value={form[field.name]}
+                    onChange={handleChange}
+                    required={!field.optional}
+                    readOnly={isReadOnly}
+                    className={`w-full p-3 border border-gray-300 rounded-xl ${
+                      isReadOnly ? "bg-gray-100 cursor-not-allowed" : ""
+                    }`}
+                  />
+                </div>
+              );
+            })}
           </div>
+
+          {/* Hint */}
+          {form.employeeType === "user" && (
+            <p className="text-sm text-blue-500 mt-2">
+              Enter salary and PAN card for this user
+            </p>
+          )}
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition mt-6"
+            className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 mt-6"
           >
             {editData ? "Update Payslip" : "Submit Payslip"}
           </button>

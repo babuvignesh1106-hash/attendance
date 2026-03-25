@@ -18,7 +18,7 @@ export default function StaffEdit({ setActivePage }) {
 
   useEffect(() => {
     if (!staffId) return;
-    fetch(`https://attendance-backend-bqhw.vercel.app/staff/${staffId}`)
+    fetch(`https://attendance-backend-snvv.onrender.com/staff/${staffId}`)
       .then((res) => res.json())
       .then((data) => setForm(data));
   }, [staffId]);
@@ -30,12 +30,12 @@ export default function StaffEdit({ setActivePage }) {
     e.preventDefault();
     try {
       await fetch(
-        `https://attendance-backend-bqhw.vercel.app/staff/${staffId}`,
+        `https://attendance-backend-snvv.onrender.com/staff/${staffId}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
-        }
+        },
       );
 
       setShowSuccess(true);

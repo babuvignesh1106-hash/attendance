@@ -14,7 +14,7 @@ export default function LeaveTable({ onBack }) {
     const fetchLeaves = async () => {
       try {
         const response = await axios.get(
-          "https://attendance-backend-sandy.vercel.app/leaves",
+          "https://attendance-backend-snvv.onrender.com/leaves",
         );
         setLeaveData(response.data);
       } catch (error) {
@@ -78,7 +78,7 @@ export default function LeaveTable({ onBack }) {
   const handleSave = async () => {
     try {
       await axios.put(
-        `https://attendance-backend-sandy.vercel.app/leaves/${editingLeave.id}`,
+        `https://attendance-backend-snvv.onrender.com/leaves/${editingLeave.id}`,
         {
           status: editingLeave.status,
         },

@@ -13,7 +13,7 @@ export default function PermissionRecords({ setActivePage }) {
     const fetchRecords = async () => {
       try {
         const res = await axios.get(
-          "https://attendance-backend-sandy.vercel.app/permission",
+          "https://attendance-backend-snvv.onrender.com/permission",
         );
 
         // Filter only the logged-in user's records

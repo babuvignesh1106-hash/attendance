@@ -9,7 +9,7 @@ export default function StaffList({ setActivePage }) {
   const fetchStaff = async () => {
     try {
       const res = await fetch(
-        "https://attendance-backend-bqhw.vercel.app/staff"
+        "https://attendance-backend-snvv.onrender.com/staff",
       );
       const data = await res.json();
       setStaff(data);
@@ -27,8 +27,8 @@ export default function StaffList({ setActivePage }) {
 
     try {
       await fetch(
-        `https://attendance-backend-bqhw.vercel.app/staff/${deleteId}`,
-        { method: "DELETE" }
+        `https://attendance-backend-snvv.onrender.com/staff/${deleteId}`,
+        { method: "DELETE" },
       );
       setDeleteId(null);
       fetchStaff();
