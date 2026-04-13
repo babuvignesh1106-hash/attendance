@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API = "https://attendance-backend-snvv.onrender.com/attendance";
+const API = "https://attendance-backend-m5zj.onrender.com/attendance";
 
 const JSON_HEADERS = {
   headers: { "Content-Type": "application/json" },

@@ -11,7 +11,7 @@ export default function Approved({ setActivePage }) {
     const fetchLeaves = async () => {
       try {
         const res = await axios.get(
-          "https://attendance-backend-snvv.onrender.com/leaves",
+          "https://attendance-backend-m5zj.onrender.com/leaves",
         );
         const userLeaves = res.data.filter((leave) => leave.name === username);
         setLeaves(userLeaves);

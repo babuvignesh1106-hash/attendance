@@ -77,7 +77,7 @@ export default function LeaveRequestForm({ setActivePage }) {
     try {
       // Fetch current leave balance
       const balanceRes = await axios.get(
-        `https://attendance-backend-sandy.vercel.app/leaves/balance/${name}`,
+        `https://attendance-backend-m5zj.onrender.com/leaves/balance/${name}`,
       );
       const balance = balanceRes.data; // { sickLeave: 2, personalLeave: 1, earnedLeave: 5 }
 
@@ -112,7 +112,7 @@ export default function LeaveRequestForm({ setActivePage }) {
 
       // Submit leave request
       await axios.post(
-        "https://attendance-backend-sandy.vercel.app/leaves",
+        "https://attendance-backend-m5zj.onrender.com/leaves",
         formData,
       );
 

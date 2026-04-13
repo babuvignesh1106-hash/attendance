@@ -35,7 +35,7 @@ export default function NewEmpPayroll() {
         }
 
         const res = await axios.get(
-          "https://attendance-backend-snvv.onrender.com/paySlip",
+          "https://attendance-backend-m5zj.onrender.com/paySlip",
         );
 
         const cleanStored = storedName.trim().toLowerCase();

@@ -12,7 +12,7 @@ const ForgotPassword = () => {
 
     try {
       const res = await axios.post(
-        "https://attendance-snowy-alpha.vercel.app/auth/forgot-password",
+        "https://attendance-backend-m5zj.onrender.com/auth/forgot-password",
         { email },
       );
 

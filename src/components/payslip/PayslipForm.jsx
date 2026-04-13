@@ -3,7 +3,9 @@ import axios from "axios";
 import { ROUTES } from "../../constants/routes";
 import { useNavigate } from "react-router-dom";
 
-// ✅ Success Dialog
+const BASE_URL = "https://attendance-backend-m5zj.onrender.com";
+
+// Success Dialog
 function SuccessDialog({ message, onConfirm }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
@@ -27,17 +29,15 @@ export default function PayslipForm({ editData, setActivePage }) {
 
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
-
   const [allEmployees, setAllEmployees] = useState([]);
 
   const now = new Date();
   const currentMonth = now.toLocaleString("en-US", { month: "long" });
   const currentYear = now.getFullYear();
 
-  // ✅ FORM STATE
   const [form, setForm] = useState({
     selectedEmployeeId: "",
-    employeeType: "", // ✅ staff or user
+    employeeType: "",
     employeeId: "",
     employeeName: "",
     designation: "",
@@ -47,21 +47,19 @@ export default function PayslipForm({ editData, setActivePage }) {
     dateOfJoining: "",
     month: currentMonth,
     year: currentYear,
+    payableDays: "",
+    paidDays: "",
   });
 
-  // ✅ FETCH DATA
+  // FETCH EMPLOYEES
   useEffect(() => {
     const fetchAllEmployees = async () => {
       try {
         const [staffRes, usersRes] = await Promise.all([
-          axios.get("https://attendance-backend-snvv.onrender.com/staff"),
-          axios.get("https://attendance-backend-snvv.onrender.com/users"), // ⚠️ replace in production
+          axios.get(`${BASE_URL}/staff`),
+          axios.get(`${BASE_URL}/users`),
         ]);
 
-        console.log("STAFF:", staffRes.data);
-        console.log("USERS:", usersRes.data);
-
-        // ✅ STAFF
         const staffData = staffRes.data.map((s) => ({
           id: `staff-${s.id}`,
           type: "staff",
@@ -73,15 +71,14 @@ export default function PayslipForm({ editData, setActivePage }) {
           dateOfJoining: s.dateOfJoining,
         }));
 
-        // ✅ USERS
         const usersData = usersRes.data.map((u) => ({
           id: `user-${u.id}`,
           type: "user",
           employeeId: u.employeeId,
           employeeName: `${u.name} (User)`,
           designation: u.designation,
-          salary: "", // editable
-          panCard: "", // editable
+          salary: "",
+          panCard: "",
           dateOfJoining: u.dateOfJoining,
         }));
 
@@ -94,7 +91,7 @@ export default function PayslipForm({ editData, setActivePage }) {
     fetchAllEmployees();
   }, []);
 
-  // ✅ EDIT PREFILL
+  // EDIT PREFILL
   useEffect(() => {
     if (editData) {
       setForm({
@@ -109,20 +106,19 @@ export default function PayslipForm({ editData, setActivePage }) {
         dateOfJoining: editData.dateOfJoining || "",
         month: editData.month || currentMonth,
         year: editData.year || currentYear,
+        payableDays: "",
+        paidDays: "",
       });
     }
   }, [editData]);
 
-  // ✅ INPUT CHANGE
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ DROPDOWN SELECT
   const handleEmployeeChange = (e) => {
     const selectedId = e.target.value;
-
     const selected = allEmployees.find((emp) => emp.id === selectedId);
 
     if (selected) {
@@ -140,7 +136,6 @@ export default function PayslipForm({ editData, setActivePage }) {
     }
   };
 
-  // ✅ SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -150,19 +145,15 @@ export default function PayslipForm({ editData, setActivePage }) {
         salary: Number(form.salary),
         bonus: form.bonus ? Number(form.bonus) : undefined,
         year: Number(form.year),
+        payableDays: Number(form.payableDays),
+        paidDays: Number(form.paidDays),
       };
 
       if (editData) {
-        await axios.put(
-          `https://attendance-backend-sandy.vercel.app/payslip/${editData.id}`,
-          payload,
-        );
+        await axios.put(`${BASE_URL}/payslip/${editData.id}`, payload);
         setDialogMessage("Payslip updated successfully!");
       } else {
-        await axios.post(
-          "https://attendance-backend-sandy.vercel.app/payslip",
-          payload,
-        );
+        await axios.post(`${BASE_URL}/payslip`, payload);
         setDialogMessage("Payslip added successfully!");
       }
 
@@ -176,7 +167,6 @@ export default function PayslipForm({ editData, setActivePage }) {
     }
   };
 
-  // ✅ DIALOG OK
   const handleDialogConfirm = () => {
     setShowDialog(false);
     navigate(ROUTES.PAYROLL_DASHBOARD);
@@ -196,10 +186,11 @@ export default function PayslipForm({ editData, setActivePage }) {
           onSubmit={handleSubmit}
           className="w-full max-w-3xl bg-white p-8 rounded-3xl shadow-xl"
         >
-          {/* Back */}
           <button
             type="button"
-            onClick={() => setActivePage(ROUTES.PAYROLL)}
+            onClick={() =>
+              setActivePage ? setActivePage(ROUTES.PAYROLL) : null
+            }
             className="bg-gray-500 text-white px-5 py-3 rounded-xl mb-4"
           >
             Back
@@ -210,7 +201,6 @@ export default function PayslipForm({ editData, setActivePage }) {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Dropdown */}
             <div className="md:col-span-2">
               <label className="block mb-2 text-gray-600">
                 Employee Name <span className="text-red-500">*</span>
@@ -223,7 +213,6 @@ export default function PayslipForm({ editData, setActivePage }) {
                 required
               >
                 <option value="">Select Employee</option>
-
                 {allEmployees.map((emp) => (
                   <option key={emp.id} value={emp.id}>
                     {emp.employeeName}
@@ -232,7 +221,6 @@ export default function PayslipForm({ editData, setActivePage }) {
               </select>
             </div>
 
-            {/* Fields */}
             {[
               { name: "employeeId", label: "Employee ID" },
               { name: "designation", label: "Designation" },
@@ -242,6 +230,8 @@ export default function PayslipForm({ editData, setActivePage }) {
               { name: "bonus", label: "Bonus", type: "number", optional: true },
               { name: "month", label: "Month" },
               { name: "year", label: "Year", type: "number" },
+              { name: "payableDays", label: "Payable Days", type: "number" },
+              { name: "paidDays", label: "Paid Days", type: "number" },
             ].map((field) => {
               const isReadOnly =
                 ["employeeId", "designation", "dateOfJoining"].includes(
@@ -253,8 +243,7 @@ export default function PayslipForm({ editData, setActivePage }) {
               return (
                 <div key={field.name}>
                   <label className="block mb-2 text-gray-600">
-                    {field.label}{" "}
-                    {!field.optional && <span className="text-red-500">*</span>}
+                    {field.label}
                   </label>
 
                   <input
@@ -262,7 +251,6 @@ export default function PayslipForm({ editData, setActivePage }) {
                     name={field.name}
                     value={form[field.name]}
                     onChange={handleChange}
-                    required={!field.optional}
                     readOnly={isReadOnly}
                     className={`w-full p-3 border border-gray-300 rounded-xl ${
                       isReadOnly ? "bg-gray-100 cursor-not-allowed" : ""
@@ -272,13 +260,6 @@ export default function PayslipForm({ editData, setActivePage }) {
               );
             })}
           </div>
-
-          {/* Hint */}
-          {form.employeeType === "user" && (
-            <p className="text-sm text-blue-500 mt-2">
-              Enter salary and PAN card for this user
-            </p>
-          )}
 
           <button
             type="submit"

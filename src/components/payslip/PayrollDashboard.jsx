@@ -33,7 +33,7 @@ const PayrollDashboard = ({ setActivePage }) => {
   const fetchPayslips = async () => {
     try {
       const res = await axios.get(
-        "https://attendance-backend-sandy.vercel.app/payslip",
+        "https://attendance-backend-m5zj.onrender.com/payslip",
       );
       setPayslips(res.data);
     } catch (err) {
@@ -61,7 +61,7 @@ const PayrollDashboard = ({ setActivePage }) => {
 
     try {
       await axios.delete(
-        `https://attendance-backend-snvv.onrender.com/payslip/${id}`,
+        `https://attendance-backend-m5zj.onrender.com/payslip/${id}`,
       );
       fetchPayslips();
     } catch (err) {
