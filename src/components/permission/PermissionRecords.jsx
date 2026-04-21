@@ -13,7 +13,7 @@ export default function PermissionRecords({ setActivePage }) {
     const fetchRecords = async () => {
       try {
         const res = await axios.get(
-          "https://attendance-backend-m5zj.onrender.com/permission",
+          "https://attendance-backend-1-eohz.onrender.com/permission",
         );
 
         // Filter only the logged-in user's records

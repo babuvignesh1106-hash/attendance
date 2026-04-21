@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://attendance-backend-m5zj.onrender.com/",
+  baseURL: "https://attendance-backend-1-eohz.onrender.com",
 });
 
 // ✅ Attach token automatically

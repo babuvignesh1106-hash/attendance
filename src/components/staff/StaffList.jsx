@@ -9,7 +9,7 @@ export default function StaffList({ setActivePage }) {
   const fetchStaff = async () => {
     try {
       const res = await fetch(
-        "https://attendance-backend-m5zj.onrender.com/staff",
+        "https://attendance-backend-1-eohz.onrender.com/staff",
       );
       const data = await res.json();
       setStaff(data);
@@ -27,7 +27,7 @@ export default function StaffList({ setActivePage }) {
 
     try {
       await fetch(
-        `https://attendance-backend-m5zj.onrender.com/staff/${deleteId}`,
+        `https://attendance-backend-1-eohz.onrender.com/staff/${deleteId}`,
         { method: "DELETE" },
       );
       setDeleteId(null);

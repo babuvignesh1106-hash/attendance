@@ -7,6 +7,7 @@ export default function GeneratePayslip({ data }) {
   const pdfRef = useRef();
   console.log(data);
   if (!data) return <p className="text-center p-10">No payslip data found.</p>;
+  const gross = data.salary + (data.bonus || 0);
 
   const downloadPDF = async () => {
     const element = pdfRef.current;
@@ -135,8 +136,8 @@ export default function GeneratePayslip({ data }) {
               <span>Paid days:</span>
             </div>
             <div className="h-24 flex flex-col justify-center">
-              <span>30</span>
-              <span>30</span>
+              <span>{data.payableDays}</span>
+              <span>{data.paidDays}</span>
             </div>
           </div>
 
@@ -163,7 +164,7 @@ export default function GeneratePayslip({ data }) {
           <div className="grid grid-cols-6">
             {/* Earnings Labels */}
             <div
-              className="h-44 flex flex-col"
+              className="flex flex-col justify-between h-44"
               style={{
                 border: "1px solid #000000",
                 letterSpacing: "1px",
@@ -184,12 +185,12 @@ export default function GeneratePayslip({ data }) {
               className="h-44 flex flex-col items-center"
               style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
-              <span>{data.salary}</span>
-              <span>-</span>
-              <span>-</span>
-              <span>-</span>
-              <span>-</span>
-              <span>-</span>
+              <span>{data.basicPay}</span>
+              <span>{data.hra}</span>
+              <span>{data.conveyance}</span>
+              <span>{data.medicalAllowance}</span>
+              <span>{data.specialAllowance}</span>
+              <span>{data.otherAllowance}</span>
               <span>{data.bonus || 0}</span>
             </div>
 
@@ -199,11 +200,12 @@ export default function GeneratePayslip({ data }) {
               style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
               <span>{data.salary * 2}</span>
-              <span>-</span>
-              <span>-</span>
-              <span>-</span>
-              <span>-</span>
-              <span>-</span>
+              <span>{data.ytdBasicpay}</span>
+              <span>{data.ytdHra}</span>
+              <span>{data.ytdConveyance}</span>
+              <span>{data.ytdMedicalAllowance}</span>
+              <span>{data.ytdSpecialAllowance}</span>
+              <span>{data.ytdOtherAllowance}</span>
               <span>{(data.bonus || 0) * 2}</span>
             </div>
 
@@ -293,7 +295,7 @@ export default function GeneratePayslip({ data }) {
           </div>
           <div className="grid grid-cols-6 text-center">
             <div
-              className="h-10 flex items-center col-span-5 text-center"
+              className="h-10 flex items-center col-span-5 text-center font-bold "
               style={{
                 border: "1px solid #000000",
                 letterSpacing: "1px",
@@ -304,14 +306,14 @@ export default function GeneratePayslip({ data }) {
             </div>
 
             <div
-              className="h-10 col-span-1 flex items-center justify-center"
+              className="h-10 col-span-1 flex items-center justify-center "
               style={{
                 border: "1px solid #000000",
                 letterSpacing: "1px",
                 paddingLeft: "2px",
               }}
             >
-              Amount
+              -
             </div>
           </div>
           <div className="grid grid-cols-6 text-center">
@@ -345,7 +347,7 @@ export default function GeneratePayslip({ data }) {
                 paddingLeft: "2px",
               }}
             >
-              Total
+              {gross}
             </div>
           </div>
           <div className="grid grid-cols-6 text-center">
@@ -367,7 +369,7 @@ export default function GeneratePayslip({ data }) {
                 paddingLeft: "2px",
               }}
             >
-              Total
+              {convertToWords(gross)} Rupees
             </div>
           </div>
 

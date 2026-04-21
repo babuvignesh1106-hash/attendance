@@ -35,7 +35,7 @@ const ResetPassword = () => {
       console.log("SENDING TOKEN:", token); // 🔍 debug
 
       const res = await axios.post(
-        "https://attendance-backend-m5zj.onrender.com/auth/reset-password",
+        "https://attendance-backend-1-eohz.onrender.com/auth/reset-password",
         {
           token,
           password,

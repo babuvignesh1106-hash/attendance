@@ -3,7 +3,7 @@ import axios from "axios";
 import { ROUTES } from "../../constants/routes";
 import { useNavigate } from "react-router-dom";
 
-const BASE_URL = "https://attendance-backend-m5zj.onrender.com";
+const BASE_URL = "https://attendance-backend-1-eohz.onrender.com";
 
 // Success Dialog
 function SuccessDialog({ message, onConfirm }) {
