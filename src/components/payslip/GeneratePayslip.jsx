@@ -199,14 +199,13 @@ export default function GeneratePayslip({ data }) {
               className="h-44 flex flex-col items-center"
               style={{ border: "1px solid #000000", letterSpacing: "1px" }}
             >
-              <span>{data.salary * 2}</span>
-              <span>{data.ytdBasicpay}</span>
+              <span>{data.ytdBasicPay}</span>
               <span>{data.ytdHra}</span>
               <span>{data.ytdConveyance}</span>
               <span>{data.ytdMedicalAllowance}</span>
               <span>{data.ytdSpecialAllowance}</span>
               <span>{data.ytdOtherAllowance}</span>
-              <span>{(data.bonus || 0) * 2}</span>
+              <span>{data.bonus || 0}</span>
             </div>
 
             {/* Deduction Labels */}
@@ -244,24 +243,44 @@ export default function GeneratePayslip({ data }) {
             </div>
           </div>
 
-          {/* Totals */}
-          <div className="grid grid-cols-6">
-            {[
-              "Gross Total",
-              data.salary + (data.bonus || 0),
-              (data.salary + (data.bonus || 0)) * 2,
-              "Total Deductions",
-              0,
-              "",
-            ].map((txt, i) => (
-              <div
-                key={i}
-                className="h-10 flex items-center justify-center"
-                style={{ border: "1px solid #000000" }}
-              >
-                {txt}
-              </div>
-            ))}
+          {/* Totals Row */}
+          <div className="grid grid-cols-6 font-normal">
+            <div
+              className="h-10 flex items-center px-1"
+              style={{ border: "1px solid #000000" }}
+            >
+              Gross Total
+            </div>
+            <div
+              className="h-10 flex items-center justify-center"
+              style={{ border: "1px solid #000000" }}
+            >
+              {data.grossSalary}
+            </div>
+            <div
+              className="h-10 flex items-center justify-center"
+              style={{ border: "1px solid #000000" }}
+            >
+              {data.ytdNetSalary}
+            </div>
+            <div
+              className="h-10 flex items-center px-1"
+              style={{ border: "1px solid #000000" }}
+            >
+              0
+            </div>
+            <div
+              className="h-10 flex items-center justify-center"
+              style={{ border: "1px solid #000000" }}
+            >
+              0
+            </div>
+            <div
+              className="h-10 flex items-center justify-center"
+              style={{ border: "1px solid #000000" }}
+            >
+              0
+            </div>
           </div>
 
           {/* Net Pay */}

@@ -18,6 +18,25 @@ const months = [
   "November",
   "December",
 ];
+function SuccessDialog({ message, onConfirm }) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-[320px] text-center">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">
+          Confirmation
+        </h2>
+        <p className="text-gray-600 mb-6">{message}</p>
+
+        <button
+          onClick={onConfirm}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md w-full"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const PayrollDashboard = ({ setActivePage }) => {
   const [payslips, setPayslips] = useState([]);
@@ -25,6 +44,9 @@ const PayrollDashboard = ({ setActivePage }) => {
   const [selectedPayslip, setSelectedPayslip] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editPayslip, setEditPayslip] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
 
   const today = new Date();
   const [selectedMonth, setSelectedMonth] = useState(months[today.getMonth()]);
@@ -56,9 +78,6 @@ const PayrollDashboard = ({ setActivePage }) => {
 
   // Delete handler
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this payslip?"))
-      return;
-
     try {
       await axios.delete(
         `https://attendance-backend-1-eohz.onrender.com/payslip/${id}`,
@@ -66,7 +85,8 @@ const PayrollDashboard = ({ setActivePage }) => {
       fetchPayslips();
     } catch (err) {
       console.error("Delete error:", err);
-      alert("Failed to delete the payslip!");
+      setDialogMessage("Failed to delete the payslip!");
+      setShowDialog(true);
     }
   };
 
@@ -81,9 +101,15 @@ const PayrollDashboard = ({ setActivePage }) => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      {showDialog && (
+        <SuccessDialog
+          message={dialogMessage}
+          onConfirm={() => setShowDialog(false)}
+        />
+      )}
       <button
         type="button"
-        onClick={() => setActivePage(ROUTES.PAYROLL)}
+        onClick={() => (setActivePage = Routes.PayrollDashboard)}
         className="flex-1 bg-gray-500 text-white px-2 py-3 rounded-xl hover:bg-gray-600 transition"
       >
         Back

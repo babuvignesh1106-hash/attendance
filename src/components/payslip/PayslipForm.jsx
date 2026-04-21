@@ -4,6 +4,20 @@ import { ROUTES } from "../../constants/routes";
 import { useNavigate } from "react-router-dom";
 
 const BASE_URL = "https://attendance-backend-1-eohz.onrender.com";
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "Auguest",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 // Success Dialog
 function SuccessDialog({ message, onConfirm }) {
@@ -143,7 +157,7 @@ export default function PayslipForm({ editData, setActivePage }) {
       const payload = {
         ...form,
         salary: Number(form.salary),
-        bonus: form.bonus ? Number(form.bonus) : undefined,
+        bonus: Number(form.bonus || 0),
         year: Number(form.year),
         payableDays: Number(form.payableDays),
         paidDays: Number(form.paidDays),
@@ -246,16 +260,31 @@ export default function PayslipForm({ editData, setActivePage }) {
                     {field.label}
                   </label>
 
-                  <input
-                    type={field.type || "text"}
-                    name={field.name}
-                    value={form[field.name]}
-                    onChange={handleChange}
-                    readOnly={isReadOnly}
-                    className={`w-full p-3 border border-gray-300 rounded-xl ${
-                      isReadOnly ? "bg-gray-100 cursor-not-allowed" : ""
-                    }`}
-                  />
+                  {field.name === "month" ? (
+                    <select
+                      name="month"
+                      value={form.month}
+                      onChange={handleChange}
+                      className="w-full p-3 border border-gray-300 rounded-xl bg-white"
+                    >
+                      {months.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={field.type || "text"}
+                      name={field.name}
+                      value={form[field.name]}
+                      onChange={handleChange}
+                      readOnly={isReadOnly}
+                      className={`w-full p-3 border border-gray-300 rounded-xl ${
+                        isReadOnly ? "bg-gray-100 cursor-not-allowed" : ""
+                      }`}
+                    />
+                  )}
                 </div>
               );
             })}
