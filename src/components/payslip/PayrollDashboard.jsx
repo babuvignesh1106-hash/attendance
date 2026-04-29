@@ -4,12 +4,22 @@ import GeneratePayslip from "./GeneratePayslip";
 import PayslipForm from "./PayslipForm";
 import { ROUTES } from "../../constants/routes";
 import { useNavigate } from "react-router-dom";
- 
+
 const months = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
- 
+
 function SuccessDialog({ message, onConfirm }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
@@ -26,28 +36,26 @@ function SuccessDialog({ message, onConfirm }) {
     </div>
   );
 }
- 
+
 const PayrollDashboard = () => {
   const navigate = useNavigate();
- 
+
   const [payslips, setPayslips] = useState([]);
   const [loading, setLoading] = useState(true);
- 
+
   const [selectedPayslip, setSelectedPayslip] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editPayslip, setEditPayslip] = useState(null);
- 
+
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [showDeleteBox, setShowDeleteBox] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
- 
+
   const today = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(
-    months[today.getMonth()]
-  );
+  const [selectedMonth, setSelectedMonth] = useState(months[today.getMonth()]);
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
- 
+
   const fetchPayslips = async () => {
     try {
       const res = await axios.get("http://localhost:8000/payslip");
@@ -58,23 +66,23 @@ const PayrollDashboard = () => {
       setLoading(false);
     }
   };
- 
+
   useEffect(() => {
     fetchPayslips();
   }, []);
- 
+
   // EDIT
   const handleEdit = (p) => {
     setEditPayslip(p);
     setShowForm(true);
   };
- 
+
   // OPEN DELETE CONFIRM BOX
   const openDeleteBox = (id) => {
     setDeleteId(id);
     setShowDeleteBox(true);
   };
- 
+
   // CONFIRM DELETE
   const confirmDelete = async () => {
     try {
@@ -87,20 +95,17 @@ const PayrollDashboard = () => {
       setDeleteId(null);
     }
   };
- 
+
   const filteredPayslips = payslips.filter(
     (p) =>
       p.month?.toLowerCase() === selectedMonth.toLowerCase() &&
-      p.year === selectedYear
+      p.year === selectedYear,
   );
- 
-  const years = [...new Set(payslips.map((p) => p.year))].sort(
-    (a, b) => b - a
-  );
- 
+
+  const years = [...new Set(payslips.map((p) => p.year))].sort((a, b) => b - a);
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
- 
       {/* BACK BUTTON FIXED */}
       <button
         onClick={() => navigate(ROUTES.PAYROLL)}
@@ -108,9 +113,9 @@ const PayrollDashboard = () => {
       >
         Back
       </button>
- 
+
       <h1 className="text-3xl font-bold mb-6">Payroll Dashboard</h1>
- 
+
       {/* FORM */}
       {showForm && (
         <PayslipForm
@@ -122,14 +127,14 @@ const PayrollDashboard = () => {
           }}
         />
       )}
- 
+
       {/* DELETE CONFIRM BOX */}
       {showDeleteBox && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
           <div className="bg-white p-6 rounded shadow-md w-[300px] text-center">
             <h2 className="text-lg font-semibold mb-3">Delete Payslip?</h2>
             <p className="mb-4">Are you sure you want to delete?</p>
- 
+
             <div className="flex gap-3 justify-center">
               <button
                 onClick={() => setShowDeleteBox(false)}
@@ -137,7 +142,7 @@ const PayrollDashboard = () => {
               >
                 Cancel
               </button>
- 
+
               <button
                 onClick={confirmDelete}
                 className="bg-blue-700 px-4 py-2 text-white rounded"
@@ -148,7 +153,7 @@ const PayrollDashboard = () => {
           </div>
         </div>
       )}
- 
+
       {/* FILTER */}
       <div className="flex gap-3 mb-4">
         {months.map((m) => (
@@ -163,7 +168,7 @@ const PayrollDashboard = () => {
           </button>
         ))}
       </div>
- 
+
       {/* TABLE */}
       {loading ? (
         <p>Loading...</p>
@@ -180,7 +185,7 @@ const PayrollDashboard = () => {
               <th>Action</th>
             </tr>
           </thead>
- 
+
           <tbody>
             {filteredPayslips.map((p) => (
               <tr key={p.id} className="text-center border-b">
@@ -190,7 +195,7 @@ const PayrollDashboard = () => {
                 <td>{p.salary}</td>
                 <td>{p.month}</td>
                 <td>{p.year}</td>
- 
+
                 <td className="flex gap-2 justify-center p-2">
                   <button
                     onClick={() => handleEdit(p)}
@@ -198,14 +203,14 @@ const PayrollDashboard = () => {
                   >
                     Edit
                   </button>
- 
+
                   <button
                     onClick={() => openDeleteBox(p.id)}
                     className="bg-red-500 text-white px-2"
                   >
                     Delete
                   </button>
- 
+
                   <button
                     onClick={() => setSelectedPayslip(p)}
                     className="bg-green-500 text-white px-2"
@@ -218,7 +223,7 @@ const PayrollDashboard = () => {
           </tbody>
         </table>
       )}
- 
+
       {/* PREVIEW */}
       {selectedPayslip && (
         <div className="mt-6">
@@ -228,6 +233,5 @@ const PayrollDashboard = () => {
     </div>
   );
 };
- 
+
 export default PayrollDashboard;
- 
