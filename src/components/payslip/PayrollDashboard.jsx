@@ -3,33 +3,22 @@ import axios from "axios";
 import GeneratePayslip from "./GeneratePayslip";
 import PayslipForm from "./PayslipForm";
 import { ROUTES } from "../../constants/routes";
-
+import { useNavigate } from "react-router-dom";
+ 
 const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
 ];
+ 
 function SuccessDialog({ message, onConfirm }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-[320px] text-center">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800">
-          Confirmation
-        </h2>
-        <p className="text-gray-600 mb-6">{message}</p>
-
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+      <div className="bg-white p-6 rounded shadow-md w-[320px] text-center">
+        <h2 className="text-lg font-semibold mb-3">Confirmation</h2>
+        <p className="mb-4">{message}</p>
         <button
           onClick={onConfirm}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md w-full"
+          className="bg-blue-600 text-white px-4 py-2 rounded w-full"
         >
           OK
         </button>
@@ -37,26 +26,31 @@ function SuccessDialog({ message, onConfirm }) {
     </div>
   );
 }
-
-const PayrollDashboard = ({ setActivePage }) => {
+ 
+const PayrollDashboard = () => {
+  const navigate = useNavigate();
+ 
   const [payslips, setPayslips] = useState([]);
   const [loading, setLoading] = useState(true);
+ 
   const [selectedPayslip, setSelectedPayslip] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editPayslip, setEditPayslip] = useState(null);
+ 
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
+  const [showDeleteBox, setShowDeleteBox] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
+ 
   const today = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(months[today.getMonth()]);
+  const [selectedMonth, setSelectedMonth] = useState(
+    months[today.getMonth()]
+  );
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
-
+ 
   const fetchPayslips = async () => {
     try {
-      const res = await axios.get(
-        "https://attendance-backend-1-eohz.onrender.com/payslip",
-      );
+      const res = await axios.get("http://localhost:8000/payslip");
       setPayslips(res.data);
     } catch (err) {
       console.error(err);
@@ -64,192 +58,176 @@ const PayrollDashboard = ({ setActivePage }) => {
       setLoading(false);
     }
   };
-
+ 
   useEffect(() => {
     fetchPayslips();
   }, []);
-
-  // Edit handler
-  const handleEdit = (payslip) => {
-    setEditPayslip(payslip);
+ 
+  // EDIT
+  const handleEdit = (p) => {
+    setEditPayslip(p);
     setShowForm(true);
-    setSelectedPayslip(null);
   };
-
-  // Delete handler
-  const handleDelete = async (id) => {
+ 
+  // OPEN DELETE CONFIRM BOX
+  const openDeleteBox = (id) => {
+    setDeleteId(id);
+    setShowDeleteBox(true);
+  };
+ 
+  // CONFIRM DELETE
+  const confirmDelete = async () => {
     try {
-      await axios.delete(
-        `https://attendance-backend-1-eohz.onrender.com/payslip/${id}`,
-      );
+      await axios.delete(`http://localhost:8000/payslip/${deleteId}`);
       fetchPayslips();
     } catch (err) {
-      console.error("Delete error:", err);
-      setDialogMessage("Failed to delete the payslip!");
-      setShowDialog(true);
+      console.error(err);
+    } finally {
+      setShowDeleteBox(false);
+      setDeleteId(null);
     }
   };
-
-  // Filter payslips by month & year
+ 
   const filteredPayslips = payslips.filter(
     (p) =>
-      p.month.toLowerCase() === selectedMonth.toLowerCase() &&
-      p.year === selectedYear,
+      p.month?.toLowerCase() === selectedMonth.toLowerCase() &&
+      p.year === selectedYear
   );
-
-  const years = [...new Set(payslips.map((p) => p.year))].sort((a, b) => b - a);
-
+ 
+  const years = [...new Set(payslips.map((p) => p.year))].sort(
+    (a, b) => b - a
+  );
+ 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      {showDialog && (
-        <SuccessDialog
-          message={dialogMessage}
-          onConfirm={() => setShowDialog(false)}
-        />
-      )}
+ 
+      {/* BACK BUTTON FIXED */}
       <button
-        type="button"
-        onClick={() => (setActivePage = Routes.PayrollDashboard)}
-        className="flex-1 bg-gray-500 text-white px-2 py-3 rounded-xl hover:bg-gray-600 transition"
+        onClick={() => navigate(ROUTES.PAYROLL)}
+        className="bg-gray-500 text-white px-4 py-2 rounded mb-4"
       >
         Back
       </button>
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">
-        Payroll Dashboard
-      </h1>
-
-      {/* Payslip Form */}
+ 
+      <h1 className="text-3xl font-bold mb-6">Payroll Dashboard</h1>
+ 
+      {/* FORM */}
       {showForm && (
-        <div className="mb-6 bg-white p-6 rounded shadow-md border border-gray-200">
-          <PayslipForm
-            editData={editPayslip}
-            onSuccess={() => {
-              fetchPayslips();
-              setShowForm(false);
-              setEditPayslip(null);
-            }}
-          />
-        </div>
+        <PayslipForm
+          editData={editPayslip}
+          onSuccess={() => {
+            fetchPayslips();
+            setShowForm(false);
+            setEditPayslip(null);
+          }}
+        />
       )}
-
-      {/* Month & Year Navigation */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex overflow-x-auto gap-2">
-          {months.map((month) => (
-            <button
-              key={month}
-              onClick={() => setSelectedMonth(month)}
-              className={`px-4 py-2 rounded transition ${
-                selectedMonth === month
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
-            >
-              {month.slice(0, 3)}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">Year:</span>
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="border px-2 py-1 rounded"
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Loading / No data */}
-      {loading ? (
-        <p className="text-gray-500">Loading payslips...</p>
-      ) : filteredPayslips.length === 0 ? (
-        <p className="text-gray-500">
-          No payslips found for {selectedMonth} {selectedYear}.
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200 shadow rounded">
-            <thead className="bg-gray-100 text-gray-700 uppercase text-sm">
-              <tr>
-                <th className="p-3 border-b">Employee ID</th>
-                <th className="p-3 border-b">Name</th>
-                <th className="p-3 border-b">Designation</th>
-                <th className="p-3 border-b">Salary</th>
-                <th className="p-3 border-b">Month</th>
-                <th className="p-3 border-b">Year</th>
-                <th className="p-3 border-b">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPayslips.map((p, index) => (
-                <tr
-                  key={`${p.id}-${index}`}
-                  className="hover:bg-gray-50 transition"
-                >
-                  <td className="p-3 border-b">{p.employeeId}</td>
-                  <td className="p-3 border-b">{p.employeeName}</td>
-                  <td className="p-3 border-b">{p.designation}</td>
-                  <td className="p-3 border-b">₹{p.salary.toLocaleString()}</td>
-                  <td className="p-3 border-b capitalize">{p.month}</td>
-                  <td className="p-3 border-b">{p.year}</td>
-
-                  {/* ACTION BUTTONS */}
-                  <td className="p-3 border-b flex gap-2">
-                    <button
-                      onClick={() => handleEdit(p)}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
-                    >
-                      Edit
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-                    >
-                      Delete
-                    </button>
-
-                    <button
-                      onClick={() => setSelectedPayslip(p)}
-                      className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
-                    >
-                      Generate
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Selected Payslip Preview */}
-      {selectedPayslip && (
-        <div className="mt-10 bg-white p-6 rounded shadow-md border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-700">
-              Payslip Preview
-            </h2>
-            <button
-              onClick={() => setSelectedPayslip(null)}
-              className="text-red-600 underline hover:text-red-800 transition"
-            >
-              Close
-            </button>
+ 
+      {/* DELETE CONFIRM BOX */}
+      {showDeleteBox && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white p-6 rounded shadow-md w-[300px] text-center">
+            <h2 className="text-lg font-semibold mb-3">Delete Payslip?</h2>
+            <p className="mb-4">Are you sure you want to delete?</p>
+ 
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setShowDeleteBox(false)}
+                className="bg-gray-400 px-4 py-2 text-white rounded"
+              >
+                Cancel
+              </button>
+ 
+              <button
+                onClick={confirmDelete}
+                className="bg-blue-700 px-4 py-2 text-white rounded"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-
+        </div>
+      )}
+ 
+      {/* FILTER */}
+      <div className="flex gap-3 mb-4">
+        {months.map((m) => (
+          <button
+            key={m}
+            onClick={() => setSelectedMonth(m)}
+            className={`px-3 py-1 rounded ${
+              selectedMonth === m ? "bg-blue-600 text-white" : "bg-gray-200"
+            }`}
+          >
+            {m.slice(0, 3)}
+          </button>
+        ))}
+      </div>
+ 
+      {/* TABLE */}
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <table className="w-full bg-white shadow">
+          <thead>
+            <tr className="bg-gray-200">
+              <th>ID</th>
+              <th>Name</th>
+              <th>Designation</th>
+              <th>Salary</th>
+              <th>Month</th>
+              <th>Year</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+ 
+          <tbody>
+            {filteredPayslips.map((p) => (
+              <tr key={p.id} className="text-center border-b">
+                <td>{p.employeeId}</td>
+                <td>{p.employeeName}</td>
+                <td>{p.designation}</td>
+                <td>{p.salary}</td>
+                <td>{p.month}</td>
+                <td>{p.year}</td>
+ 
+                <td className="flex gap-2 justify-center p-2">
+                  <button
+                    onClick={() => handleEdit(p)}
+                    className="bg-yellow-500 text-white px-2"
+                  >
+                    Edit
+                  </button>
+ 
+                  <button
+                    onClick={() => openDeleteBox(p.id)}
+                    className="bg-red-500 text-white px-2"
+                  >
+                    Delete
+                  </button>
+ 
+                  <button
+                    onClick={() => setSelectedPayslip(p)}
+                    className="bg-green-500 text-white px-2"
+                  >
+                    Generate
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+ 
+      {/* PREVIEW */}
+      {selectedPayslip && (
+        <div className="mt-6">
           <GeneratePayslip data={selectedPayslip} />
         </div>
       )}
     </div>
   );
 };
-
+ 
 export default PayrollDashboard;
+ 
